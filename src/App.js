@@ -1,23 +1,33 @@
-import logo from './logo.svg';
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
+import Customers from './pages/customers/Customers'
+import Login from './pages/login/Login';
+import OrderPlacement from './pages/order-placement/OrderPlacement';
+import OrderOverview from './pages/order-overview/OrderOverview';
+import Settings from './pages/settings/Settings'
+
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='App'>
+
+    <BrowserRouter>
+    
+      <Routes>
+
+        <Route path={'/login'} element={<Login />} />
+
+        {/* Guard auth */}
+        <Route path={'/order-overview'} element={<OrderOverview />} />
+        <Route path={'/order-placement'} element={<OrderPlacement />} />
+        <Route path={'/customers'} element={<Customers />} />
+        <Route path={'settings'} element={<Settings />} />
+
+      </Routes>
+
+    </BrowserRouter>
+
     </div>
   );
 }
