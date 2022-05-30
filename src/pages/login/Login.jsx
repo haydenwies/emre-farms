@@ -26,23 +26,20 @@ export default function Login() {
                     <form onSubmit={handleSubmit}>
                         <input 
                             type="email" 
-                            placeholder='email'
+                            placeholder="email"
                             onChange={(e) => setEmail(e.target.value)}
                             value={email}
                             required
                         />
                         <input 
                             type="password" 
-                            placeholder='password'
+                            placeholder="password"
                             onChange={(e) => setPassword(e.target.value)}
                             value={password}
                             required
                         />
-                        <button
-                            // className={}
-                            // disabled={}
-                        >
-                            {"login"}
+                        <button>
+                            login
                         </button>
                     </form>
                 </div>
