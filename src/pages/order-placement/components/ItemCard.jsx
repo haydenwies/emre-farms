@@ -1,70 +1,85 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
+
+import { SizeOptions, TypeOptions } from '../../../backend/tempSettings';
+
 import Dropdown from '../../../components/Dropdown';
 
-export default function ItemCard({ itemSize, itemType, itemQuantity }) {
-    // For size selection
-    const [size, setSize] = useState(itemSize);
-    const sizeOptions = [
-        {label: "Choose size", value: "n/a"},
-        {label: "Mini Mini", value: "mm"},
-        {label: "Mini", value: "m"},
-        {label: "B-Size", value: "b"},
-        {label: "10lb", value: "10lb"},
-        {label: "Large box", value: "lbox"},
-        {label: "Large bag", value: "lbag"},
-        {label: "2nd grade", value: "2g"}
-    ];
-    // For type selection
-    const [type, setType] = useState(itemType);
-    const typeOptions = [
-        {label: "Choose type", value: "n/a"},
-        {label: "White", value: "w"},
-        {label: "Red", value: "r"},
-        {label: "Yellow flesh", value: "yf"},
-        {label: "Yukon gold", value: "ykg"}
-    ];
-    // For quantity selection
-    const [quantity, setQuantity] = useState(itemQuantity);
+const ACTIONS = {
+    UPDATE_SIZE: 'updateSize',
+    UPDATE_TYPE: 'updateType',
+    UPDATE_QTY: 'updateQty'
+};
 
-    // When user selects from size dropdown
-    const onChangeSize = (e) => {
-        e.preventDefault();
-        setSize(e.target.value);
+const reducer = (item, action) => {
+    switch (action.type) {
+        case ACTIONS.UPDATE_SIZE:
+            // Change size attribute
+            return { id: item.id, size: action.payload, type: item.type, quantity: item.quantity }
+        case ACTIONS.UPDATE_TYPE:
+            // Change type attribute
+            return { id: item.id, size: item.size, type: action.payload, quantity: item.quantity }
+        case ACTIONS.UPDATE_QTY:
+            // Change quantity
+            return { id: item.id, size: item.size, type: item.type, quantity: action.payload }
+        default:
+            return item
+    };
+};
+
+export default function ItemCard({ id, order, setOrder }) {
+    const [item, dispatch] = useReducer(reducer, { id: id, size: "", type: "", quantity: undefined });
+
+    // Update order when attribute changes
+    const updateOrder = () => {
+        const newOrder = order.map((x) => (
+            x.id === item.id ? item : x
+        ));
+        setOrder(newOrder);
     };
 
-    // When user selects from type dropdown
-    const onChangeType = (e) => {
-        e.preventDefault();
-        setType(e.target.value);
-    };
-
-    // When user sets quantity
-    const onChangeQty = (e) => {
-        e.preventDefault();
-        setQuantity(e.target.value);
+    const onDelete = () => {
+        const newOrder = order.filter(x => x.id !== item.id)
+        setOrder(newOrder)
     };
 
     return (
         <div className='item-card'>
             <Dropdown 
                 label={""}
-                options={sizeOptions}
-                value={size}
-                onChange={onChangeSize}
+                options={SizeOptions}
+                value={item.size}
+                onChange={(e) => { 
+                    dispatch({ type: ACTIONS.UPDATE_SIZE, payload: e.target.value });
+                    updateOrder();
+                }}
             />
             <Dropdown 
                 label={""}
-                options={typeOptions}
-                value={type}
-                onChange={onChangeType}
+                options={TypeOptions}
+                value={item.type}
+                onChange={(e) => { 
+                    dispatch({ type: ACTIONS.UPDATE_TYPE, payload: e.target.value });
+                    updateOrder();
+                }}
             />
             <input 
                 type="number" 
-                value={quantity}
+                defaultValue={item.quantity}
                 placeholder={0}
                 min={1}
-                onChange={onChangeQty}
+                onChange={(e) => { 
+                    dispatch({ type: ACTIONS.UPDATE_QTY, payload: e.target.value });
+                }}
+                onBlur={updateOrder}
             />
+            <button
+                onClick={(e) => {
+                    e.preventDefault();
+                    onDelete();
+                }}
+            >
+                delete
+            </button>
         </div>
     )
 }
