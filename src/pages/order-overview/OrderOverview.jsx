@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 import { db } from '../../backend/config'
@@ -9,10 +9,11 @@ import SortDropdown from './components/SortDropdown';
 
 import './OrderOverview.css'
 
-const LISTENER_ACTIONS = {
-    ADD_ORDER: "addOrder",
-    MODIFY_ORDER: "modifyOrder",
-    REMOVE_ORDER: "removeOrder"
+const ORDER_DATA_ACTIONS = {
+    ADD_ORDER: "add",
+    MODIFY_ORDER: "modify",
+    REMOVE_ORDER: "remove",
+    SORT_ORDER: "sort"
 }
 
 const MODAL_ACTIONS = {
@@ -24,12 +25,14 @@ const MODAL_ACTIONS = {
 
 const ordersReducer = (orders, action) => { 
     switch (action.type) {
-        case LISTENER_ACTIONS.ADD_ORDER: 
+        case ORDER_DATA_ACTIONS.ADD_ORDER: 
             return [...orders, action.payload ]
-        case LISTENER_ACTIONS.MODIFY_ORDER:
+        case ORDER_DATA_ACTIONS.MODIFY_ORDER:
             return orders.map(order => order.id === action.payload.id ? action.payload : order)
-        case LISTENER_ACTIONS.REMOVE_ORDER:
+        case ORDER_DATA_ACTIONS.REMOVE_ORDER:
             return orders.filter(order => order.id !== action.payload.id)
+        // case ORDER_DATA_ACTIONS.SORT_ORDER:
+        //     return action.payload
         default:
             return orders
     }
@@ -40,7 +43,6 @@ const modalReducer = (modal, action) => {
         case MODAL_ACTIONS.VIEW:
             return { show: true, isEditing: false, order: action.payload }
         case MODAL_ACTIONS.EDIT:
-            console.log(action.payload);
             return { show: true, isEditing: true, order: action.payload }
         case MODAL_ACTIONS.CLOSE:
             return { show: false, isEditing: false, order: action.payload }
@@ -49,6 +51,7 @@ const modalReducer = (modal, action) => {
                 client: modal.order.client,
                 deliveryType: modal.order.deliveryType,
                 id: modal.order.id,
+                orderDate: modal.order.orderDate,
                 order: modal.order.order.map(item => item.id === action.payload.id ? action.payload : item)
             }
             return { show: true, isEditing: true, order: newOrder }
@@ -58,38 +61,59 @@ const modalReducer = (modal, action) => {
 }
 
 export default function OrderOverview() {
+    // For data management
     const [orders, dispatchOrders] = useReducer(ordersReducer, [])
     const [modal, dispatchModal] = useReducer(modalReducer, { show: false, isEditing: false, order: null })
+    // For sorting fetched orders
+    const [sort, setSort] = useState("date-ascending");
 
+
+    // ---------- Take order updated in modal and push changes to database ----------
     const onUpdate = async (order) => {
-        const orderRef = doc(db, "orders", order.id)
+        const orderRef = doc(db, "orders-incomplete", order.id)
         setDoc(orderRef, order, { merge: true })
     }
 
+    // ---------- Delete order from array ----------
     const onDelete = async (order) => {
         await deleteDoc(doc(db, "orders", order.id))
     }
 
-    useEffect(() => {
-
-        const unsub = onSnapshot(collection(db, "orders"), (snapshot) => {
+    // ---------- Listener to attach to orders-incomplete ----------
+    const attachSnapshot = () => {
+        // ---------- Compare order to array of orders and check if it already exists ----------
+        const isInArray = (order) => {
+            if (orders.filter(x => x.id === order.id).length > 0) {
+                return true
+            } else {
+                return false
+            } 
+        }
+        const unsub = onSnapshot(collection(db, "orders-incomplete"), (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
-                    dispatchOrders({ type: LISTENER_ACTIONS.ADD_ORDER, payload: change.doc.data() })
+                    if (!isInArray(change.doc.data())) {
+                        dispatchOrders({ type: ORDER_DATA_ACTIONS.ADD_ORDER, payload: change.doc.data() })
+                    }
                 }
                 if (change.type === "modified") {
-                    dispatchOrders({ type: LISTENER_ACTIONS.MODIFY_ORDER, payload: change.doc.data() })
+                    console.log("here");
+                    dispatchOrders({ type: ORDER_DATA_ACTIONS.MODIFY_ORDER, payload: change.doc.data() })
                 }
                 if (change.type === "removed") {
-                    dispatchOrders({ type: LISTENER_ACTIONS.REMOVE_ORDER, payload: change.doc.data() })
+                    dispatchOrders({ type: ORDER_DATA_ACTIONS.REMOVE_ORDER, payload: change.doc.data() })
                 }
             });
         });
+        return unsub
+    };
 
+    // ---------- Attach listener on view mount ----------
+    useEffect(() => {  
+        const unsub = attachSnapshot();
         return () => {
-            unsub()
-        }
-
+            unsub();
+        };
     }, []);
 
     return (
@@ -128,6 +152,7 @@ export default function OrderOverview() {
                             </button>
                             <h1>Client: {modal.order.client}</h1>
                             <h2>Delivery type: {modal.order.deliveryType}</h2>
+                            <p>Order date: {modal.order.orderDate}</p>
                             {modal.order.order.map((item) => (
                                 <div key={item.id}>
                                     {modal.isEditing && (
@@ -196,7 +221,10 @@ export default function OrderOverview() {
                     </div>
                 )}
                 <div className="sort-dropdown">
-                    <SortDropdown />
+                    <SortDropdown 
+                        value={sort}
+                        setValue={setSort}
+                    />
                 </div>
                 <div className="labels">
                     <p>customer:</p>

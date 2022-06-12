@@ -16,3 +16,8 @@ export const TypeOptions = [
     {label: "Yellow flesh", value: "yellow-flesh"},
     {label: "Yukon gold", value: "yukon-gold"}
 ];
+
+export const SortOptions = [
+    {label: "date (ascending)", value: "date-ascending"},
+    {label: "date (descending)", value: "date-descending"}
+]

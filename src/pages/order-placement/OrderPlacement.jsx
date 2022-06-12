@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { collection, doc, setDoc } from "firebase/firestore"; 
 
 import { db } from '../../backend/config'
+import { datetimeString } from '../../utils/datetimeUtils';
 
 import ItemCard from './components/ItemCard';
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
@@ -35,11 +36,13 @@ export default function OrderPlacement() {
                 setButtonText("Confirm");
             } else {
                 // On second click save to database, reset order and button text
-                const docRef = doc(collection(db, "orders"));
+                const timestamp = datetimeString()
+                const docRef = doc(collection(db, "orders-incomplete"));
                 await setDoc(docRef, {
                     client: client,
                     deliveryType: deliveryType,
                     id: docRef.id,
+                    orderDate: timestamp,
                     order
                 });
                 setOrder([]);
