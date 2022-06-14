@@ -13,6 +13,7 @@ export default function OrderPlacement() {
     // Order data
     const [client, setClient] = useState("");
     const [deliveryType, setDeliveryType] = useState("")
+    const [dueDate, setDueDate] = useState("");
     const [order, setOrder] = useState([]);
     // Handling confirm button text
     const [buttonText, setButtonText] = useState("Submit order");
@@ -41,10 +42,14 @@ export default function OrderPlacement() {
                 await setDoc(docRef, {
                     client: client,
                     deliveryType: deliveryType,
+                    dueDate: dueDate,
                     id: docRef.id,
-                    orderDate: timestamp,
-                    order
+                    order,
+                    orderDate: timestamp
                 });
+                setClient("");
+                setDeliveryType("");
+                setDueDate("");
                 setOrder([]);
                 setButtonText("Submit order")
             };
@@ -58,10 +63,14 @@ export default function OrderPlacement() {
         if (
             client !== "" &&
             deliveryType !== "" &&
+            dueDate !== "" &&
             order.filter(
                 x => x.size !== "" &&
                 x.type !== "" && 
-                x.quantity !== 0
+                x.quantity !== 0 &&
+                x.size !== undefined &&
+                x.type !== undefined && 
+                x.quantity !== undefined
             ).length > 0
         ) {
             return true
@@ -83,6 +92,13 @@ export default function OrderPlacement() {
                 <DeliveryTypeDropdown 
                     value={deliveryType}
                     setValue={setDeliveryType}
+                />
+                <input 
+                    type={"date"}
+                    defaultValue={dueDate}
+                    onChange={(e) => {
+                        setDueDate(e.target.value)
+                    }}
                 />
                 {/* Item cards */}
                 <div>
