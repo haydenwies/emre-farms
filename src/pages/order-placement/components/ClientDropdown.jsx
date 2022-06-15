@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import Dropdown from '../../../components/Dropdown';
 
-export default function CustomerDropdown({ value, setValue, options }) {
+export default function ClientDropdown({ value, setValue, options }) {
 
     const onChange = (e) => {
         e.preventDefault();
@@ -11,8 +12,8 @@ export default function CustomerDropdown({ value, setValue, options }) {
         <Dropdown 
             label={"Client: "}
             options={options}
-            value={value.name}
-            setValue={onChange}
+            value={value}
+            onChange={onChange}
         />
     )
 }
