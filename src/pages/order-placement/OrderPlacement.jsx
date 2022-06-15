@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { collection, doc, setDoc } from "firebase/firestore"; 
 
 import { db } from '../../backend/config'
@@ -10,7 +10,7 @@ import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import './OrderPlacement.css';
 
 export default function OrderPlacement() {
-    // Order data
+    // Order data    
     const [client, setClient] = useState("");
     const [deliveryType, setDeliveryType] = useState("")
     const [dueDate, setDueDate] = useState("");
@@ -78,6 +78,10 @@ export default function OrderPlacement() {
             return false
         }
     }
+
+    useEffect(() => {
+
+    }, [])
 
     return (
         <div className='order-placement'>

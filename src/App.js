@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
-import Customers from './pages/customers/Customers'
+import Clients from './pages/clients/Clients'
 import Login from './pages/login/Login';
 import OrderPlacement from './pages/order-placement/OrderPlacement';
 import OrderOverview from './pages/order-overview/OrderOverview';
@@ -21,7 +21,7 @@ function App() {
         {/* Guard auth */}
         <Route path={'/order-overview'} element={<OrderOverview />} />
         <Route path={'/order-placement'} element={<OrderPlacement />} />
-        <Route path={'/customers'} element={<Customers />} />
+        <Route path={'/clients'} element={<Clients />} />
         <Route path={'settings'} element={<Settings />} />
 
       </Routes>

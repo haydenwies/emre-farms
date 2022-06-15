@@ -1,4 +1,4 @@
-import { OrderSortOptions } from '../../../backend/tempSettings';
+import { ClientSortOptions } from '../../../backend/tempSettings';
 import Dropdown from '../../../components/Dropdown';
 
 export default function SortDropdown({ value, setValue, sortCallback }) {
@@ -11,8 +11,8 @@ export default function SortDropdown({ value, setValue, sortCallback }) {
 
     return (
         <Dropdown
-            label={"Sort:"}
-            options={OrderSortOptions}
+            label={"Sort by: "}
+            options={ClientSortOptions}
             value={value}
             onChange={onChange}
         />
