@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import Dropdown from '../../../components/Dropdown';
 
 export default function ClientDropdown({ value, setValue, options }) {

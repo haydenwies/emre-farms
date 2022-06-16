@@ -1,4 +1,14 @@
-.modal-frame {
+/* TEMP */
+.order-overview img {
+    width: 20px;
+    height: 20px;
+}
+
+.order-overview .print-template {
+    display: none;
+}
+
+.order-overview .modal-frame {
     position: fixed;
     top: 0;
     left: 0;
@@ -7,7 +17,7 @@
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal {
+.order-overview .modal {
     margin: 0 auto;
     margin-top: 10vh;
     padding: 20px;
@@ -15,3 +25,4 @@
     height: 70vh;
     background-color: white;
 }
+
