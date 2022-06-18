@@ -37,15 +37,15 @@ export default function OrderPlacement() {
     const [clients, setClients] = useState([]);
     const [clientOptions, setClientOptions] = useState([{ label: "Choose a client", value: "" }]);
     // Managing state of view components
-    const [buttonText, setButtonText] = useState("Submit order");
+    const [buttonText, setButtonText] = useState("submit order");
 
     const onSubmit = async (e) => {
         e.preventDefault();
         // Check if order is valid
         if (isValidOrder()) {
-            if (buttonText === "Submit order") {
+            if (buttonText === "submit order") {
                 // Toggle button text on first click
-                setButtonText("Confirm");
+                setButtonText("confirm submit");
             } else {
                 // On second click save to database, reset order and button text
                 const timestamp = datetimeString();
@@ -108,6 +108,14 @@ export default function OrderPlacement() {
     return (
         <div className='order-placement'>
             <div className='pannel'>
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET })
+                    }}
+                >
+                    reset
+                </button>
                 <ClientDropdown 
                     value={order.client}
                     setValue={(client) => {
@@ -129,7 +137,7 @@ export default function OrderPlacement() {
                 />
                 <input 
                     type={"date"}
-                    defaultValue={order.dueDate}
+                    value={order.dueDate}
                     onChange={(e) => {
                         dispatchOrder({ 
                             type: ORDER_DATA_ACTIONS.MODIFY,
@@ -161,7 +169,7 @@ export default function OrderPlacement() {
                         dispatchOrder({ type: ORDER_DATA_ACTIONS.ADD })
                     }}
                 >
-                    Add item
+                    add item
                 </button>
                 {/* Save order */}
                 <button

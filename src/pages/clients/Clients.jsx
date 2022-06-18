@@ -52,7 +52,7 @@ const selectedReducer = (selectedClient, action) => {
         case SELECTED_CLIENT_ACTIONS.MODIFY:
             return { isOpen: true, isEditing: true, client: action.payload };
         case SELECTED_CLIENT_ACTIONS.CLOSE:
-            return { isOpen: false, isEditing: false, client: null }
+            return { isOpen: false, isEditing: false, client: null };
         default: 
             return selectedClient;
     };
@@ -63,7 +63,9 @@ export default function Customers() {
     const [clients, dispatchClients] = useReducer(clientsReducer, []);
     const [selected, dispatchSelected] = useReducer(selectedReducer, {isOpen: false, isEditing: false, client: null});
     // For sorting fetched clients - change value to change default sort method
-    const [sort, setSort] = useState("name")
+    const [sort, setSort] = useState("name");
+    // For managing state of components on page
+    const [buttonText, setButtonText] = useState("delete");
 
     // ---------- Add new customer to database ----------
     const onSave = async () => {
@@ -71,7 +73,7 @@ export default function Customers() {
             // Client already has ID meaning they already exist and doc should be updated not created in database
             const docRef = doc(db, "clients", selected.client.id);
             setDoc(docRef, selected.client, { merge: true });
-            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.SELECT, payload: selected.client });
         } else {
             // Client doesn't have ID meainig they don't exist and doc should be created in backend
             if (selected.client.name && selected.client.preferredDeliveryType) {           
@@ -130,7 +132,7 @@ export default function Customers() {
         return () => {
             unsub();
         };
-    });
+    }, []);
 
     return (
         <div className='clients'>
@@ -162,33 +164,6 @@ export default function Customers() {
             {/* ---------- Selected client ---------- */}
             {selected.isOpen && (
                 <div className="client-pannel">
-                    <input 
-                        type="text" 
-                        value={selected.client.name}
-                        onChange={(e) => {
-                            dispatchSelected({
-                                type: SELECTED_CLIENT_ACTIONS.MODIFY,
-                                payload: { 
-                                    name: e.target.value, 
-                                    id: selected.client.id, 
-                                    preferredDeliveryType: selected.client.preferredDeliveryType
-                                }
-                            });
-                        }}
-                    />
-                    <DeliveryTypeDropdown 
-                        value={selected.client.preferredDeliveryType}
-                        setValue={(value) => {
-                            dispatchSelected({ 
-                                type: SELECTED_CLIENT_ACTIONS.MODIFY,
-                                payload: {
-                                    name: selected.client.name,
-                                    id: selected.client.id,
-                                    preferredDeliveryType: value
-                                }
-                            });
-                        }}
-                    />
                     <button
                         onClick={(e) => {
                             e.preventDefault();
@@ -197,22 +172,77 @@ export default function Customers() {
                     >
                         close
                     </button>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            onSave();
-                        }}
-                    >
-                        save    
-                    </button>  
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            onDelete();
-                        }}
-                    >
-                        delete
-                    </button>
+                    {selected.isEditing && (
+                        <>
+                            <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onSave();
+                            }}
+                            >
+                                save    
+                            </button> 
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (selected.client.id) {
+                                        if (buttonText === "delete") {
+                                            setButtonText("confirm delete")
+                                        } else {
+                                            onDelete();
+                                            setButtonText("delete")
+                                        }
+                                    } else {
+                                        dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE })
+                                    }
+                                }}
+                            >
+                                {selected.client.id ? buttonText : "cancel"}
+                            </button>
+                            <input 
+                                type="text" 
+                                value={selected.client.name}
+                                onChange={(e) => {
+                                    dispatchSelected({
+                                        type: SELECTED_CLIENT_ACTIONS.MODIFY,
+                                        payload: { 
+                                            name: e.target.value, 
+                                            id: selected.client.id, 
+                                            preferredDeliveryType: selected.client.preferredDeliveryType
+                                        }
+                                    });
+                                }}
+                            />
+                            <DeliveryTypeDropdown 
+                                value={selected.client.preferredDeliveryType}
+                                setValue={(value) => {
+                                    dispatchSelected({ 
+                                        type: SELECTED_CLIENT_ACTIONS.MODIFY,
+                                        payload: {
+                                            name: selected.client.name,
+                                            id: selected.client.id,
+                                            preferredDeliveryType: value
+                                        }
+                                    });
+                                }}
+                            />
+                        </>
+                    )}
+                    {!selected.isEditing && (
+                        <>
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.MODIFY, payload: selected.client })
+                                }}
+                            >
+                                edit
+                            </button>
+                            <p>{selected.client.name}</p>
+                            <p>{selected.client.preferredDeliveryType}</p>
+                        </>
+                    )}
+                    
                 </div>
             )}
         </div>

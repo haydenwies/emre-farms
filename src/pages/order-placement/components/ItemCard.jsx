@@ -4,6 +4,8 @@ import { SizeOptions, TypeOptions } from '../../../backend/tempSettings';
 
 import Dropdown from '../../../components/Dropdown';
 
+import '../OrderPlacement.css'
+
 const ACTIONS = {
     UPDATE_SIZE: 'updateSize',
     UPDATE_TYPE: 'updateType',

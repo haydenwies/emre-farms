@@ -46,11 +46,11 @@ const ordersReducer = (orders, action) => {
 const modalReducer = (modal, action) => {
     switch (action.type){
         case MODAL_ACTIONS.VIEW:
-            return { isOpen: true, isEditing: false, order: action.payload };
+            return { isOpen: true, isEditing: false, changesMade: false, order: action.payload };
         case MODAL_ACTIONS.EDIT:
-            return { isOpen: true, isEditing: true, order: action.payload };
+            return { isOpen: true, isEditing: true, changesMade: false, order: action.payload };
         case MODAL_ACTIONS.CLOSE:
-            return { isOpen: false, isEditing: false, order: action.payload };
+            return { isOpen: false, isEditing: false, changesMade: false, order: action.payload };
         case MODAL_ACTIONS.UPDATE_ITEM:
             const newOrder = {
                 client: modal.order.client,
@@ -59,7 +59,7 @@ const modalReducer = (modal, action) => {
                 orderDate: modal.order.orderDate,
                 order: modal.order.order.map(item => item.id === action.payload.id ? action.payload : item)
             };
-            return { isOpen: true, isEditing: true, order: newOrder };
+            return { isOpen: true, isEditing: true, changesMade: true, order: newOrder };
         default:
             return modal;
     };
@@ -68,12 +68,12 @@ const modalReducer = (modal, action) => {
 export default function OrderOverview() {
     // For data management
     const [orders, dispatchOrders] = useReducer(ordersReducer, []);
-    const [modal, dispatchModal] = useReducer(modalReducer, { isOpen: false, isEditing: false, order: null });
+    const [modal, dispatchModal] = useReducer(modalReducer, { isOpen: false, isEditing: false, changesMade: false, order: null });
+    const [selectedOrders, setSelectedOrders] = useState([]);
     // For sorting fetched orders - change value to change default sort method
     const [sort, setSort] = useState("dueDate");
-    // Printing data
+    // For printing
     const printRef = useRef();
-    const [printQueue, setPrintQueue] = useState([]);
 
     // ---------- Take order updated in modal and push changes to database ----------
     const onUpdate = async (order) => {
@@ -83,7 +83,7 @@ export default function OrderOverview() {
 
     // ---------- Delete order from array ----------
     const onDelete = async (order) => {
-        await deleteDoc(doc(db, "orders-incomplete", order.id))
+        await deleteDoc(doc(db, "orders-incomplete", order.id));
     };
 
     // ---------- Listener to attach to orders-incomplete ----------
@@ -115,13 +115,14 @@ export default function OrderOverview() {
 
     // ---------- Determine if order exists in print queue ----------
     const isInPrintQueue = (order) => {
-        if (printQueue.filter(x => x.id === order.id).length > 0) {
+        if (selectedOrders.filter(x => x.id === order.id).length > 0) {
             return true 
         } else {
             return false
         }
     }
 
+    // When print button is tapped triggers react-to-print
     const handlePrint = useReactToPrint({
         content: () => printRef.current
     });
@@ -141,7 +142,7 @@ export default function OrderOverview() {
             <div className="print-template">
                 <PrintTemplate 
                     ref={printRef}
-                    printQueue={printQueue}
+                    selectedOrders={selectedOrders}
                 />
             </div>
             {/* ---------- Modal ---------- */}
@@ -158,6 +159,8 @@ export default function OrderOverview() {
                         </button>
                         {modal.isEditing && (
                             <button
+                                disabled={!modal.changesMade}
+                                className={modal.changesMade ? "" : "disabled"}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     onUpdate(modal.order)
@@ -250,20 +253,32 @@ export default function OrderOverview() {
             <button
                 onClick={(e) => {
                     e.preventDefault();
-                    printQueue.length !== 0 ? setPrintQueue([]) : setPrintQueue(orders)
+                    selectedOrders.length !== 0 ? setSelectedOrders([]) : setSelectedOrders(orders)
                 }}
             >
-                {printQueue.length !== 0 ? "deselect all" : "select all"}
+                {selectedOrders.length !== 0 ? "deselect all" : "select all"}
             </button>
             <button
                 onClick={(e) => {
                     e.preventDefault();
-                    if (printQueue.length > 0) {
+                    if (selectedOrders.length > 0) {
                         handlePrint();
                     };
                 }}
             >
-                print
+                print selected
+            </button>
+            <button
+                onClick={(e) => {
+                    e.preventDefault();
+                    if (selectedOrders.length > 0) {
+                        for (const order of selectedOrders) {
+                            onDelete(order);
+                        };
+                    };
+                }}
+            >
+                delete selected
             </button>
             <SortDropdown 
                 value={sort}
@@ -278,9 +293,9 @@ export default function OrderOverview() {
                         onClick={(e) => {
                             e.preventDefault();
                             if (isInPrintQueue(order)) {
-                                setPrintQueue(printQueue.filter(x => x.id !== order.id))
+                                setSelectedOrders(selectedOrders.filter(x => x.id !== order.id))
                             } else {
-                                setPrintQueue([...printQueue, order])
+                                setSelectedOrders([...selectedOrders, order])
                             }
                         }}
                     >
@@ -309,14 +324,6 @@ export default function OrderOverview() {
                         }}
                     >
                         edit
-                    </button>
-                    <button 
-                        onClick={(e) => {
-                            e.preventDefault()
-                            onDelete(order)
-                        }}
-                    >
-                        delete
                     </button>
                 </div>
             ))}
