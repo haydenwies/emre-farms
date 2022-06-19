@@ -116,35 +116,42 @@ export default function OrderPlacement() {
                 >
                     reset
                 </button>
-                <ClientDropdown 
-                    value={order.client}
-                    setValue={(client) => {
-                        const selectedClient = clients.find(x => x.name === client)
-                        dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
-                            payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
-                        })
-                    }}
-                    options={clientOptions}
-                />
-                <DeliveryTypeDropdown 
-                    value={order.deliveryType}
-                    setValue={(deliveryType) => {
-                        dispatchOrder({ 
-                            type: ORDER_DATA_ACTIONS.MODIFY,
-                            payload: { client: order.client, deliveryType: deliveryType, dueDate: order.dueDate, order: order.order }
-                        })
-                    }}
-                />
-                <input 
-                    type={"date"}
-                    value={order.dueDate}
-                    onChange={(e) => {
-                        dispatchOrder({ 
-                            type: ORDER_DATA_ACTIONS.MODIFY,
-                            payload: { client: order.client, deliveryType: order.deliveryType, dueDate: e.target.value, order: order.order }
-                        })
-                    }}
-                />
+                <div className="client-dropdown">
+                    <ClientDropdown 
+                        className={"client-dropdown "}
+                        value={order.client}
+                        setValue={(client) => {
+                            const selectedClient = clients.find(x => x.name === client)
+                            dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
+                                payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
+                            })
+                        }}
+                        options={clientOptions}
+                    />
+                </div>
+                <div className="delivery-type-dropdown">
+                    <DeliveryTypeDropdown 
+                        value={order.deliveryType}
+                        setValue={(deliveryType) => {
+                            dispatchOrder({ 
+                                type: ORDER_DATA_ACTIONS.MODIFY,
+                                payload: { client: order.client, deliveryType: deliveryType, dueDate: order.dueDate, order: order.order }
+                            })
+                        }}
+                    />
+                </div>
+                <div className="due-date">
+                    <input 
+                        type={"date"}
+                        value={order.dueDate}
+                        onChange={(e) => {
+                            dispatchOrder({ 
+                                type: ORDER_DATA_ACTIONS.MODIFY,
+                                payload: { client: order.client, deliveryType: order.deliveryType, dueDate: e.target.value, order: order.order }
+                            })
+                        }}
+                    />
+                </div>
                 {/* Item cards */}
                 <div>
                     {order.order.map((item) => (

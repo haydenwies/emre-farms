@@ -46,24 +46,30 @@ export default function ItemCard({ id, order, setOrder }) {
 
     return (
         <div className='item-card'>
-            <Dropdown 
-                label={""}
-                options={SizeOptions}
-                value={item.size}
-                onChange={(e) => { 
-                    dispatch({ type: ACTIONS.UPDATE_SIZE, payload: e.target.value });
-                    updateOrder();
-                }}
-            />
-            <Dropdown 
-                label={""}
-                options={TypeOptions}
-                value={item.type}
-                onChange={(e) => { 
-                    dispatch({ type: ACTIONS.UPDATE_TYPE, payload: e.target.value });
-                    updateOrder();
-                }}
-            />
+            <div className="item-options">
+                <div className="size-dropdown">
+                    <Dropdown 
+                        label={""}
+                        options={SizeOptions}
+                        value={item.size}
+                        onChange={(e) => { 
+                            dispatch({ type: ACTIONS.UPDATE_SIZE, payload: e.target.value });
+                            updateOrder();
+                        }}
+                    />
+                </div>
+                <div className="type-dropdown">
+                    <Dropdown 
+                        label={""}
+                        options={TypeOptions}
+                        value={item.type}
+                        onChange={(e) => { 
+                            dispatch({ type: ACTIONS.UPDATE_TYPE, payload: e.target.value });
+                            updateOrder();
+                        }}
+                    />
+                </div>
+            </div>
             <input 
                 type="number" 
                 defaultValue={item.quantity}
