@@ -1,20 +1,20 @@
 export const SizeOptions = [
     {label: "Choose size", value: ""},
-    {label: "Mini Mini", value: "miniMini"},
-    {label: "Mini", value: "mini"},
-    {label: "B-Size", value: "bSize"},
+    {label: "Mini Mini", value: "Mini Mini"},
+    {label: "Mini", value: "Mini"},
+    {label: "B-Size", value: "B-Size"},
     {label: "10lb", value: "10lb"},
-    {label: "Large box", value: "largeBox"},
-    {label: "Large bag", value: "largeBag"},
-    {label: "2nd grade", value: "2ndGrade"}
+    {label: "Large box", value: "Large box"},
+    {label: "Large bag", value: "Large bag"},
+    {label: "2nd grade", value: "2nd grade"}
 ];
 
 export const TypeOptions = [
     {label: "Choose type", value: ""},
-    {label: "White", value: "white"},
-    {label: "Red", value: "red"},
-    {label: "Yellow flesh", value: "yellowFlesh"},
-    {label: "Yukon gold", value: "yukonGold"}
+    {label: "White", value: "White"},
+    {label: "Red", value: "Red"},
+    {label: "Yellow flesh", value: "Yellow Flesh"},
+    {label: "Yukon gold", value: "Yukon Gold"}
 ];
 
 export const OrderSortOptions = [

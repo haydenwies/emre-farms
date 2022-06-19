@@ -6,6 +6,9 @@ import ArrowDownSolid from './arrow-down-solid.svg'
 import CalendarSolid from './calendar-solid.svg'
 import ScaleBalancedSolid from './scale-balanced-solid.svg'
 import ListSolid from './list-solid.svg'
+import CirclePlusSolid from './circle-plus-solid.svg'
+import PlusSolid from './plus-solid.svg'
+import TrashSolid from './trash-solid.svg'
 
 export {
     CircleRegular,
@@ -15,5 +18,8 @@ export {
     ArrowDownSolid,
     CalendarSolid,
     ScaleBalancedSolid,
-    ListSolid
+    ListSolid,
+    CirclePlusSolid,
+    PlusSolid,
+    TrashSolid
 }

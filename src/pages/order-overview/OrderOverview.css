@@ -1,3 +1,5 @@
+
+
 /* TEMP */
 .order-overview img {
     width: 20px;
@@ -16,13 +18,106 @@
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
 }
-
 .order-overview .modal {
     margin: 0 auto;
     margin-top: 10vh;
     padding: 20px;
     max-width: 960px;
     height: 70vh;
+    border-radius: 10px;
     background-color: white;
+}
+.order-overview .modal-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+}
+.order-overview .modal-actions .left {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+.order-overview .modal-content {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    overflow-y: scroll;
+}
+.modal-content .order-item-list {
+    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.modal-content .order-item {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    align-items: center;
+    justify-content: left;
+}
+.modal-content .order-item input {
+    width: 50%;
+}
+.modal-content .order-item button {
+    width: fit-content;
+    background-color: transparent;
+}
+
+.order-overview .actions {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.order-overview .manage-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+.order-overview .labels {
+    margin-top: 40px;
+    /* margin-bottom: 20px; */
+    width: 100%;
+    display: grid;
+    grid-template-columns: 70px 1fr 1fr 1fr 106px;
+}
+.order-overview .order {
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.order-overview .selected {
+    background-color: rgb(220,220,220);
+    border-radius: 10px;
+}
+.order-overview .order .select-button {
+    margin: 0;
+    padding: 0;
+    margin-right: 40px;
+    padding-top: 6px;
+    background-color: transparent;
+}
+.order-overview .order-info {
+    width: 100%;
+    height: fit-content;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    justify-content:left;
+}
+.order-overview .order-actions {
+    height: fit-content;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
 }
 

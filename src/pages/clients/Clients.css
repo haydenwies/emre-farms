@@ -1,0 +1,11 @@
+.clients .pannel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+.clients .client-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: scroll;
+}

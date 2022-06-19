@@ -7,6 +7,7 @@ import { datetimeString } from '../../utils/datetimeUtils';
 import ItemCard from './components/ItemCard';
 import ClientDropdown from './components/ClientDropdown';
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
+import { CirclePlusSolid } from '../../assets/Assets'
 
 import './OrderPlacement.css';
 
@@ -59,6 +60,7 @@ export default function OrderPlacement() {
                     orderDate: timestamp
                 });
                 dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET });
+                setButtonText("submit order")
             };
         } else {
             // Return error: order incomplete
@@ -116,29 +118,31 @@ export default function OrderPlacement() {
                 >
                     reset
                 </button>
-                <div className="client-dropdown">
-                    <ClientDropdown 
-                        className={"client-dropdown "}
-                        value={order.client}
-                        setValue={(client) => {
-                            const selectedClient = clients.find(x => x.name === client)
-                            dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
-                                payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
-                            })
-                        }}
-                        options={clientOptions}
-                    />
-                </div>
-                <div className="delivery-type-dropdown">
-                    <DeliveryTypeDropdown 
-                        value={order.deliveryType}
-                        setValue={(deliveryType) => {
-                            dispatchOrder({ 
-                                type: ORDER_DATA_ACTIONS.MODIFY,
-                                payload: { client: order.client, deliveryType: deliveryType, dueDate: order.dueDate, order: order.order }
-                            })
-                        }}
-                    />
+                <div className="client-info">
+                    <div className="client-dropdown">
+                        <ClientDropdown 
+                            className={"client-dropdown "}
+                            value={order.client}
+                            setValue={(client) => {
+                                const selectedClient = clients.find(x => x.name === client)
+                                dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
+                                    payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
+                                })
+                            }}
+                            options={clientOptions}
+                        />
+                    </div>
+                    <div className="delivery-type-dropdown">
+                        <DeliveryTypeDropdown 
+                            value={order.deliveryType}
+                            setValue={(deliveryType) => {
+                                dispatchOrder({ 
+                                    type: ORDER_DATA_ACTIONS.MODIFY,
+                                    payload: { client: order.client, deliveryType: deliveryType, dueDate: order.dueDate, order: order.order }
+                                })
+                            }}
+                        />
+                    </div>
                 </div>
                 <div className="due-date">
                     <input 
@@ -153,9 +157,12 @@ export default function OrderPlacement() {
                     />
                 </div>
                 {/* Item cards */}
-                <div>
+                <div className={"item-list"}>
                     {order.order.map((item) => (
-                        <div key={item.id}>
+                        <div 
+                            key={item.id}
+                            className={"item"}
+                        >
                             <ItemCard 
                                 id={item.id}
                                 order={order.order}
@@ -168,16 +175,16 @@ export default function OrderPlacement() {
                             />
                         </div>
                     ))}
+                    <button
+                        className={"add-button"}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            dispatchOrder({ type: ORDER_DATA_ACTIONS.ADD })
+                        }}
+                    >
+                        <img src={CirclePlusSolid} alt="" />
+                    </button>
                 </div>
-                {/* New item */}
-                <button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        dispatchOrder({ type: ORDER_DATA_ACTIONS.ADD })
-                    }}
-                >
-                    add item
-                </button>
                 {/* Save order */}
                 <button
                     onClick={onSubmit}

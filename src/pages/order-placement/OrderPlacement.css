@@ -1,10 +1,40 @@
-.client-dropdown select {
+.order-placement .client-info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+.order-placement .client-dropdown select {
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     background-image: url('../../assets/circle-user-solid.svg');
     background-size: 12px;
 }
-.delivery-type-dropdown select {
+.order-placement .delivery-type-dropdown select {
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     background-image: url('../../assets/truck-solid.svg');
     background-size: 12px;
+}
+.order-placement .due-date input {
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+.order-placement .item-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    /* background-color: green; */
+}
+.order-placement .add-button {
+    margin: 0;
+    padding: 76px 79px;
+    background-color: rgb(169,169,169);
+}
+.order-placement .add-button img {
+    margin: 0;
+    padding: 0;
+    width: 30px;
+    height: auto;
 }
 
 /* ---------- ItemCard ---------- */

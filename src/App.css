@@ -1,3 +1,17 @@
 .disabled {
     opacity: 0.5;
 }
+
+.bold {
+    font-weight: 700;
+}
+  
+.pannel {
+    margin: 40px auto;
+    padding: 0 40px;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+}

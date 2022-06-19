@@ -7,7 +7,7 @@ import { SizeOptions, TypeOptions } from '../../backend/tempSettings';
 
 import Dropdown from '../../components/Dropdown';
 import SortDropdown from './components/SortDropdown';
-import { CircleRegular, CircleCheckSolid } from '../../assets/Assets';
+import { CircleRegular, CircleCheckSolid, TrashSolid } from '../../assets/Assets';
 import { PrintTemplate } from './components/PrintTemplate';
 
 import './OrderOverview.css';
@@ -23,7 +23,8 @@ const MODAL_ACTIONS = {
     VIEW: 'view',
     EDIT: 'edit',
     CLOSE: 'close',
-    UPDATE_ITEM: 'updateItem'
+    UPDATE_ITEM: 'updateItem',
+    DELETE_ITEM: 'deleteItem'
 };
 
 const ordersReducer = (orders, action) => { 
@@ -52,14 +53,23 @@ const modalReducer = (modal, action) => {
         case MODAL_ACTIONS.CLOSE:
             return { isOpen: false, isEditing: false, changesMade: false, order: action.payload };
         case MODAL_ACTIONS.UPDATE_ITEM:
-            const newOrder = {
+            const updatedItemOrder = {
                 client: modal.order.client,
                 deliveryType: modal.order.deliveryType,
                 id: modal.order.id,
                 orderDate: modal.order.orderDate,
                 order: modal.order.order.map(item => item.id === action.payload.id ? action.payload : item)
             };
-            return { isOpen: true, isEditing: true, changesMade: true, order: newOrder };
+            return { isOpen: true, isEditing: true, changesMade: true, order: updatedItemOrder };
+        case MODAL_ACTIONS.DELETE_ITEM:
+            const deletedItemOrder = {
+                client: modal.order.client,
+                deliveryType: modal.order.deliveryType,
+                id: modal.order.id,
+                orderDate: modal.order.orderDate,
+                order: modal.order.order.filter(item => item.id !== action.payload.id)
+            };
+            return { isOpen: true, isEditing: true, changesMade: true, order: deletedItemOrder };
         default:
             return modal;
     };
@@ -74,6 +84,8 @@ export default function OrderOverview() {
     const [sort, setSort] = useState("dueDate");
     // For printing
     const printRef = useRef();
+    // For managing state on page
+    const [deleteButtonText, setDeleteButtonText] = useState("delete")
 
     // ---------- Take order updated in modal and push changes to database ----------
     const onUpdate = async (order) => {
@@ -114,7 +126,8 @@ export default function OrderOverview() {
     }
 
     // ---------- Determine if order exists in print queue ----------
-    const isInPrintQueue = (order) => {
+    const isInSelectedOrders = (order) => {
+        console.log("object");
         if (selectedOrders.filter(x => x.id === order.id).length > 0) {
             return true 
         } else {
@@ -138,195 +151,249 @@ export default function OrderOverview() {
 
     return (
         <div className='order-overview'>
-            {/* ---------- Printing template ---------- */}
-            <div className="print-template">
-                <PrintTemplate 
-                    ref={printRef}
-                    selectedOrders={selectedOrders}
-                />
-            </div>
-            {/* ---------- Modal ---------- */}
-            {modal.isOpen && (
-                <div className="modal-frame">
-                    <div className="modal">
-                        <button 
-                            onClick={(e) => {
-                                e.preventDefault();
-                                dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
-                            }}
-                        >
-                            close
-                        </button>
-                        {modal.isEditing && (
-                            <button
-                                disabled={!modal.changesMade}
-                                className={modal.changesMade ? "" : "disabled"}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onUpdate(modal.order)
-                                    dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null })
-                                }}
-                            >
-                                save
-                            </button>
-                        )}
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                onDelete(modal.order);
-                                dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
-                            }}
-                        >
-                            delete
-                        </button>
-                        <h1>Client: {modal.order.client}</h1>
-                        <h2>Delivery type: {modal.order.deliveryType}</h2>
-                        <p>Order date: {modal.order.orderDate}</p>
-                        {modal.order.order.map((item) => (
-                            <div key={item.id}>
-                                {modal.isEditing && (
-                                    <>
-                                        <Dropdown 
-                                            label={""}
-                                            options={SizeOptions}
-                                            value={item.size}
-                                            onChange={(e) => {
-                                                dispatchModal({ 
-                                                    type: MODAL_ACTIONS.UPDATE_ITEM,
-                                                    payload: {
-                                                        id: item.id, 
-                                                        size: e.target.value, 
-                                                        type: item.type, 
-                                                        quantity: item.quantity
-                                                    } 
-                                                })
+            <div className="pannel">
+                {/* ---------- Printing template ---------- */}
+                <div className="print-template">
+                    <PrintTemplate 
+                        ref={printRef}
+                        selectedOrders={selectedOrders}
+                    />
+                </div>
+                {/* ---------- Modal ---------- */}
+                {modal.isOpen && (
+                    <div className="modal-frame">
+                        <div className="modal">
+                            <div className="modal-actions">
+                                <div className="left">
+                                    <button 
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
+                                        }}
+                                    >
+                                        close
+                                    </button>
+                                    {modal.isEditing && (
+                                        <button
+                                            disabled={!modal.changesMade}
+                                            className={modal.changesMade ? "" : "disabled"}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onUpdate(modal.order)
+                                                dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null })
                                             }}
-                                        />
-                                        <Dropdown 
-                                            label={""}
-                                            options={TypeOptions}
-                                            value={item.type}
-                                            onChange={(e) => {
-                                                dispatchModal({ 
-                                                    type: MODAL_ACTIONS.UPDATE_ITEM,
-                                                    payload: {
-                                                        id: item.id, 
-                                                        size: item.size, 
-                                                        type: e.target.value, 
-                                                        quantity: item.quantity
-                                                    } 
-                                                })
-                                            }}
-                                        />
-                                        <input 
-                                            type="number"
-                                            defaultValue={item.quantity}
-                                            placeholder={0}
-                                            min={1}
-                                            onChange={(e) => {
-                                                dispatchModal({ 
-                                                    type: MODAL_ACTIONS.UPDATE_ITEM,
-                                                    payload: {
-                                                        id: item.id, 
-                                                        size: item.size, 
-                                                        type: item.type, 
-                                                        quantity: e.target.value
-                                                    } 
-                                                })
-                                            }}
-                                        />
-                                    </>
-                                )}
-                                {!modal.isEditing && (
-                                    <>
-                                        <p>{item.size}</p>
-                                        <p>{item.type}</p>
-                                        <p>{item.quantity}</p>
-                                    </>
-                                )}
+                                        >
+                                            save
+                                        </button>
+                                    )}
+                                    </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (deleteButtonText === "delete") {
+                                            setDeleteButtonText("confirm delete")
+                                        } else {
+                                            onDelete(modal.order);
+                                            dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
+                                            setDeleteButtonText("delete")
+                                        }
+                                    }}
+                                >
+                                    {deleteButtonText}
+                                </button>
                             </div>
-                        ))}
+                            <div className="modal-content">
+                                <h1>Client: {modal.order.client}</h1>
+                                <p>Delivery type: {modal.order.deliveryType}</p>
+                                <p>Order date: {modal.order.orderDate}</p>
+                                <div className="order-item-list">
+                                    {modal.order.order.map((item) => (
+                                        <div 
+                                            key={item.id}
+                                            className={"order-item"}
+                                        >
+                                            {modal.isEditing && (
+                                                <>
+                                                    <Dropdown 
+                                                        label={""}
+                                                        options={SizeOptions}
+                                                        value={item.size}
+                                                        onChange={(e) => {
+                                                            dispatchModal({ 
+                                                                type: MODAL_ACTIONS.UPDATE_ITEM,
+                                                                payload: {
+                                                                    id: item.id, 
+                                                                    size: e.target.value, 
+                                                                    type: item.type, 
+                                                                    quantity: item.quantity
+                                                                } 
+                                                            })
+                                                        }}
+                                                    />
+                                                    <Dropdown 
+                                                        label={""}
+                                                        options={TypeOptions}
+                                                        value={item.type}
+                                                        onChange={(e) => {
+                                                            dispatchModal({ 
+                                                                type: MODAL_ACTIONS.UPDATE_ITEM,
+                                                                payload: {
+                                                                    id: item.id, 
+                                                                    size: item.size, 
+                                                                    type: e.target.value, 
+                                                                    quantity: item.quantity
+                                                                } 
+                                                            })
+                                                        }}
+                                                    />
+                                                    <input 
+                                                        type="number"
+                                                        defaultValue={item.quantity}
+                                                        placeholder={0}
+                                                        min={1}
+                                                        onChange={(e) => {
+                                                            dispatchModal({ 
+                                                                type: MODAL_ACTIONS.UPDATE_ITEM,
+                                                                payload: {
+                                                                    id: item.id, 
+                                                                    size: item.size, 
+                                                                    type: item.type, 
+                                                                    quantity: e.target.value
+                                                                } 
+                                                            })
+                                                        }}
+                                                    />
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            dispatchModal({ 
+                                                                type: MODAL_ACTIONS.DELETE_ITEM, 
+                                                                payload: item })
+                                                            }}
+                                                    >
+                                                        <img src={TrashSolid} alt="" />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {!modal.isEditing && (
+                                                <>
+                                                    <p>{item.size}</p>
+                                                    <p>{item.type}</p>
+                                                    <p>{item.quantity}</p>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* ---------- Main view ---------- */}
+                <div className="actions">
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            selectedOrders.length !== 0 ? setSelectedOrders([]) : setSelectedOrders(orders)
+                        }}
+                    >
+                        {selectedOrders.length !== 0 ? "deselect all" : "select all"}
+                    </button>
+                    <div className="manage-actions">
+                        <button
+                            disabled={selectedOrders.length === 0}
+                            className={selectedOrders.length > 0 ? "" : "disabled"}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (selectedOrders.length > 0) {
+                                    handlePrint();
+                                };
+                            }}
+                        >
+                            print selected
+                        </button>
+                        <button
+                            disabled={selectedOrders.length === 0}
+                            className={selectedOrders.length > 0 ? "" : "disabled"}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (selectedOrders.length > 0) {
+                                    for (const order of selectedOrders) {
+                                        onDelete(order);
+                                    };
+                                };
+                            }}
+                        >
+                            delete selected
+                        </button> 
                     </div>
                 </div>
-            )}
-            {/* ---------- Main view ---------- */}
-            <button
-                onClick={(e) => {
-                    e.preventDefault();
-                    selectedOrders.length !== 0 ? setSelectedOrders([]) : setSelectedOrders(orders)
-                }}
-            >
-                {selectedOrders.length !== 0 ? "deselect all" : "select all"}
-            </button>
-            <button
-                onClick={(e) => {
-                    e.preventDefault();
-                    if (selectedOrders.length > 0) {
-                        handlePrint();
-                    };
-                }}
-            >
-                print selected
-            </button>
-            <button
-                onClick={(e) => {
-                    e.preventDefault();
-                    if (selectedOrders.length > 0) {
-                        for (const order of selectedOrders) {
-                            onDelete(order);
-                        };
-                    };
-                }}
-            >
-                delete selected
-            </button>
-            <SortDropdown 
-                value={sort}
-                setValue={setSort}
-                sortCallback = {(sortMethod) => {
-                    dispatchOrders({ type: ORDER_DATA_ACTIONS.SORT, payload: sortMethod })
-                }}
-            />
-            {orders.map((order) => (
-                <div key={order.id}>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            if (isInPrintQueue(order)) {
-                                setSelectedOrders(selectedOrders.filter(x => x.id !== order.id))
-                            } else {
-                                setSelectedOrders([...selectedOrders, order])
-                            }
-                        }}
-                    >
-                        {isInPrintQueue(order) && (
-                            <img src={CircleCheckSolid} alt="" />
-                        )}
-                        {!isInPrintQueue(order) && (
-                            <img src={CircleRegular} alt="" />
-                        )}
-                    </button>
-                    <p>{order.client}</p>
-                    <p>{order.deliveryType}</p>
-                    <p>{order.quantity}</p>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            dispatchModal({ type: MODAL_ACTIONS.VIEW, payload: order})
-                        }}  
-                    >
-                        view
-                    </button>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            dispatchModal({ type: MODAL_ACTIONS.EDIT, payload: order })
-                        }}
-                    >
-                        edit
-                    </button>
+                <SortDropdown 
+                    value={sort}
+                    setValue={setSort}
+                    sortCallback = {(sortMethod) => {
+                        dispatchOrders({ type: ORDER_DATA_ACTIONS.SORT, payload: sortMethod })
+                    }}
+                />
+                <div className="labels">
+                    <div></div>
+                    <p className={"bold"}>client</p>
+                    <p className={"bold"}>delivery type</p>
+                    <p className={"bold"}>due date</p>
+                    <div className="spacer"></div>
                 </div>
-            ))}
+                {orders.map((order) => (
+                    <div 
+                        key={order.id}
+                        className={isInSelectedOrders(order) ? "order selected" : "order"}
+                    >
+                        <>
+                            
+                            <button
+                                className={"select-button"}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (isInSelectedOrders(order)) {
+                                        setSelectedOrders(selectedOrders.filter(x => x.id !== order.id))
+                                    } else {
+                                        setSelectedOrders([...selectedOrders, order])
+                                    }
+                                }}
+                            >
+                                {isInSelectedOrders(order) && (
+                                    <img src={CircleCheckSolid} alt="" />
+                                )}
+                                {!isInSelectedOrders(order) && (
+                                    <img src={CircleRegular} alt="" />
+                                )}
+                            </button>
+                            <div className="order-info">
+                                <p>{order.client}</p>
+                                <p>{order.deliveryType}</p>
+                                <p>{order.dueDate}</p>
+                            </div>
+                        </>
+                        <div className="order-actions">
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    dispatchModal({ type: MODAL_ACTIONS.VIEW, payload: order})
+                                }}  
+                            >
+                                view
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    dispatchModal({ type: MODAL_ACTIONS.EDIT, payload: order })
+                                }}
+                            >
+                                edit
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     )
 }
