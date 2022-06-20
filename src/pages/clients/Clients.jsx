@@ -1,13 +1,13 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 import { db } from '../../backend/config';
 
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import SortDropdown from './components/SortDropdown';
+import Nav from '../../components/Nav';
 
 import './Clients.css';
-import { useState } from 'react';
 
 const CLIENT_DATA_ACTIONS = {
     ADD: "add",
@@ -136,6 +136,7 @@ export default function Customers() {
 
     return (
         <div className='clients'>
+            {/* <Nav /> */}
             <div className="pannel">
                 <div className="options-view">
                     <button

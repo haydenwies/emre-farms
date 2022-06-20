@@ -9,6 +9,7 @@ import Dropdown from '../../components/Dropdown';
 import SortDropdown from './components/SortDropdown';
 import { CircleRegular, CircleCheckSolid, TrashSolid } from '../../assets/Assets';
 import { PrintTemplate } from './components/PrintTemplate';
+import Nav from '../../components/Nav';
 
 import './OrderOverview.css';
 
@@ -127,7 +128,6 @@ export default function OrderOverview() {
 
     // ---------- Determine if order exists in print queue ----------
     const isInSelectedOrders = (order) => {
-        console.log("object");
         if (selectedOrders.filter(x => x.id === order.id).length > 0) {
             return true 
         } else {
@@ -142,7 +142,6 @@ export default function OrderOverview() {
 
     // ---------- Attach listener on view mount ----------
     useEffect(() => {  
-        console.log("run");
         const unsub = attachSnapshot();
         return () => {
             unsub();
@@ -151,6 +150,7 @@ export default function OrderOverview() {
 
     return (
         <div className='order-overview'>
+            {/* <Nav /> */}
             <div className="pannel">
                 {/* ---------- Printing template ---------- */}
                 <div className="print-template">

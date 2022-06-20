@@ -7,6 +7,7 @@ import OrderOverview from './pages/order-overview/OrderOverview';
 import Settings from './pages/settings/Settings'
 
 import './App.css';
+import AuthRoutes from './pages/AuthRoutes';
 
 function App() {
   return (
@@ -18,11 +19,12 @@ function App() {
 
         <Route path={'/login'} element={<Login />} />
 
-        {/* Guard auth */}
-        <Route path={'/order-overview'} element={<OrderOverview />} />
+        <Route path={'/*'} element={<AuthRoutes />} /> 
+
+        {/* <Route path={'/order-overview'} element={<OrderOverview />} />
         <Route path={'/order-placement'} element={<OrderPlacement />} />
         <Route path={'/clients'} element={<Clients />} />
-        <Route path={'settings'} element={<Settings />} />
+        <Route path={'/settings'} element={<Settings />} /> */}
 
       </Routes>
 

@@ -9,6 +9,11 @@ import ListSolid from './list-solid.svg'
 import CirclePlusSolid from './circle-plus-solid.svg'
 import PlusSolid from './plus-solid.svg'
 import TrashSolid from './trash-solid.svg'
+import PenToSquareSolid from './pen-to-square-solid.svg'
+import RectangleListSolid from './rectangle-list-solid.svg'
+import ArrowRightFromBracketSolid from './arrow-right-from-bracket-solid.svg'
+import XSolid from './x-solid.svg'
+import BarsSolid from './bars-solid.svg'
 
 export {
     CircleRegular,
@@ -21,5 +26,10 @@ export {
     ListSolid,
     CirclePlusSolid,
     PlusSolid,
-    TrashSolid
+    TrashSolid,
+    PenToSquareSolid,
+    RectangleListSolid,
+    ArrowRightFromBracketSolid,
+    XSolid,
+    BarsSolid
 }

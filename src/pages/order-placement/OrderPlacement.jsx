@@ -8,6 +8,7 @@ import ItemCard from './components/ItemCard';
 import ClientDropdown from './components/ClientDropdown';
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import { CirclePlusSolid } from '../../assets/Assets'
+import Nav from '../../components/Nav';
 
 import './OrderPlacement.css';
 
@@ -109,6 +110,7 @@ export default function OrderPlacement() {
 
     return (
         <div className='order-placement'>
+            {/* <Nav /> */}
             <div className='pannel'>
                 <button
                     onClick={(e) => {

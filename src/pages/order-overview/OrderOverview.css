@@ -1,11 +1,7 @@
-
-
-/* TEMP */
-.order-overview img {
-    width: 20px;
-    height: 20px;
+.order-overview {
+    max-width: 1000px;
+    margin: 0 auto;
 }
-
 .order-overview .print-template {
     display: none;
 }
@@ -26,7 +22,6 @@
     height: 70vh;
     border-radius: 10px;
     background-color: white;
-    z-index: 2;
 }
 .order-overview .modal-actions {
     width: 100%;
@@ -80,17 +75,18 @@
     display: flex;
     flex-direction: row;
     gap: 20px;
+    z-index: -1;
 }
 .order-overview .labels {
     margin-top: 40px;
-    /* margin-bottom: 20px; */
     width: 100%;
     display: grid;
-    grid-template-columns: 70px 1fr 1fr 1fr 106px;
+    grid-template-columns: 70px 1fr 1fr 1fr 124px;
 }
 .order-overview .order {
     padding: 10px;
     width: 100%;
+    width: calc(100% - 20px);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -104,7 +100,9 @@
     margin: 0;
     padding: 0;
     margin-right: 40px;
-    padding-top: 6px;
+    padding-top: 3px;
+    width: 20px;
+    height: 20px;
     background-color: transparent;
 }
 .order-overview .order-info {

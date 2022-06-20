@@ -7,8 +7,8 @@
 }
   
 .pannel {
-    margin: 40px auto;
-    padding: 0 40px;
+    margin: 20px auto;
+    padding: 0;
     max-width: 1000px;
     display: flex;
     flex-direction: column;
