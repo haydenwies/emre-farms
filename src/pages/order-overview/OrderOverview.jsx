@@ -205,7 +205,7 @@ export default function OrderOverview() {
                             <div className="modal-content">
                                 <h1>Client: {modal.order.client}</h1>
                                 <p>Delivery type: {modal.order.deliveryType}</p>
-                                <p>Order date: {modal.order.orderDate}</p>
+                                <p>Order date: {modal.order.orderDate} GMT</p>
                                 <div className="order-item-list">
                                     {modal.order.order.map((item) => (
                                         <div 

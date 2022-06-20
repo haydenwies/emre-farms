@@ -1,6 +1,14 @@
 .clients .pannel {
     display: grid;
     grid-template-columns: auto 1fr;
+    gap: 0;
+    column-gap: 100px;
+}
+.clients .options-view {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* align-items: flex-start; */
 }
 .clients .client-list {
     margin-top: 20px;
@@ -8,4 +16,35 @@
     flex-direction: column;
     gap: 20px;
     overflow-y: scroll;
+}
+
+.clients .selection-view {
+    padding: 20px;
+    border-radius: 10px;
+    /* background-color: rgb(220,220,220); */
+    background-color: rgb(169,169,169);
+}
+.clients .client-pannel {
+    display: flex;
+    flex-direction: column;
+    gap: 66px;
+    align-items: flex-start;
+}
+.clients .client-pannel .actions {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.clients .client-pannel .actions-more {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.clients .client-pannel .info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }

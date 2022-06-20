@@ -167,47 +167,54 @@ export default function Customers() {
                     </div>
                 </div>
                 {/* ---------- Selected client ---------- */}
-                <div className="selection-view">
-                    {selected.isOpen && (
-                        <div className="client-pannel">
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
-                                }}
-                            >
-                                close
-                            </button>
-                            {selected.isEditing && (
-                                <>
-                                    <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        onSave();
-                                    }}
-                                    >
-                                        save    
-                                    </button> 
+                {selected.isOpen && (
+                    <div className="selection-view">
+                        {selected.isEditing && (
+                            <div className="client-pannel">
+                                <div className="actions">
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            if (selected.client.id) {
-                                                if (buttonText === "delete") {
-                                                    setButtonText("confirm delete")
-                                                } else {
-                                                    onDelete();
-                                                    setButtonText("delete")
-                                                }
-                                            } else {
-                                                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE })
-                                            }
+                                            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+                                            setButtonText("delete")
                                         }}
                                     >
-                                        {selected.client.id ? buttonText : "cancel"}
+                                        close
                                     </button>
+                                    <div className="actions-more">
+                                        <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            onSave();
+                                            setButtonText("delete")
+                                        }}
+                                        >
+                                            save    
+                                        </button> 
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                if (selected.client.id) {
+                                                    if (buttonText === "delete") {
+                                                        setButtonText("confirm delete")
+                                                    } else {
+                                                        onDelete();
+                                                        setButtonText("delete")
+                                                    }
+                                                } else {
+                                                    dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE })
+                                                }
+                                            }}
+                                        >
+                                            {selected.client.id ? buttonText : "cancel"}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="info">
                                     <input 
                                         type="text" 
                                         value={selected.client.name}
+                                        placeholder={"client name"}
                                         onChange={(e) => {
                                             dispatchSelected({
                                                 type: SELECTED_CLIENT_ACTIONS.MODIFY,
@@ -232,26 +239,39 @@ export default function Customers() {
                                             });
                                         }}
                                     />
-                                </>
-                            )}
-                            {!selected.isEditing && (
-                                <>
+                                </div>
+                            </div>
+                        )}
+                        {!selected.isEditing && (
+                            <div className="client-pannel">
+                                <div className="actions">
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+                                            setButtonText("delete")
+                                        }}
+                                    >
+                                        close
+                                    </button>
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault();
                                             dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.MODIFY, payload: selected.client })
+                                            setButtonText("delete")
                                         }}
                                     >
                                         edit
                                     </button>
-                                    <p>{selected.client.name}</p>
-                                    <p>{selected.client.preferredDeliveryType}</p>
-                                </>
-                            )}
-                            
-                        </div>
-                    )}
-                </div>
+                                </div>
+                                <div className="info">
+                                    <h1>{selected.client.name}</h1>
+                                    <p>Preferred delivery type: {selected.client.preferredDeliveryType}</p>
+                                </div>
+                            </div>
+                        )}   
+                    </div>                         
+                )}
             </div>
         </div>
     )
