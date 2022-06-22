@@ -9,7 +9,7 @@ export default function ClientDropdown({ value, setValue, options }) {
 
     return (
         <Dropdown 
-            label={"Client: "}
+            label={"client: "}
             options={options}
             value={value}
             onChange={onChange}

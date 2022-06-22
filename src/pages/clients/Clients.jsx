@@ -5,7 +5,6 @@ import { db } from '../../backend/config';
 
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import SortDropdown from './components/SortDropdown';
-import Nav from '../../components/Nav';
 
 import './Clients.css';
 
@@ -69,24 +68,28 @@ export default function Customers() {
 
     // ---------- Add new customer to database ----------
     const onSave = async () => {
-        if (selected.client.id) {
-            // Client already has ID meaning they already exist and doc should be updated not created in database
-            const docRef = doc(db, "clients", selected.client.id);
-            setDoc(docRef, selected.client, { merge: true });
-            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.SELECT, payload: selected.client });
-        } else {
-            // Client doesn't have ID meainig they don't exist and doc should be created in backend
-            if (selected.client.name && selected.client.preferredDeliveryType) {           
-                const docRef = doc(collection(db, "clients"));
-                await setDoc(docRef, {
-                    name: selected.client.name,
-                    id: docRef.id,
-                    preferredDeliveryType: selected.client.preferredDeliveryType
-                });
-                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+        if (selected.client.name.toLowerCase() !== "other") {
+            if (selected.client.id) {
+                // Client already has ID meaning they already exist and doc should be updated not created in database
+                const docRef = doc(db, "clients", selected.client.id);
+                setDoc(docRef, selected.client, { merge: true });
+                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.SELECT, payload: selected.client });
             } else {
-                window.alert("Please fill in all fields before saving a new client.");
+                // Client doesn't have ID meainig they don't exist and doc should be created in backend
+                if (selected.client.name && selected.client.preferredDeliveryType) {           
+                    const docRef = doc(collection(db, "clients"));
+                    await setDoc(docRef, {
+                        name: selected.client.name,
+                        id: docRef.id,
+                        preferredDeliveryType: selected.client.preferredDeliveryType
+                    });
+                    dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+                } else {
+                    window.alert("Please fill in all fields before saving a new client.");
+                };
             };
+        } else {
+            window.alert("Cannot name client 'other'.")
         };
     };
 

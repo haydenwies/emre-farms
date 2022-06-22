@@ -7,20 +7,13 @@ import OrderOverview from './order-overview/OrderOverview';
 import Settings from './settings/Settings'
 
 import './AuthRoutes.css'
-import { useEffect } from 'react';
 
 export default function AuthRoutes() {
-    const currentPath = useLocation().pathname;
-
-    useEffect(() => {
-        console.log(currentPath);
-    })
 
     return (
         <div className="auth-routes" >
             <Nav />
             <Routes>
-                {/* <Route path='/' element={<Clients />} /> */}
                 <Route path={'/order-overview'} element={<OrderOverview />} />
                 <Route path={'/order-placement'} element={<OrderPlacement />} />
                 <Route path={`/clients`} element={<Clients />} />

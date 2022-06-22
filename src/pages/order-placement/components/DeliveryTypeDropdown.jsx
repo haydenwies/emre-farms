@@ -11,7 +11,7 @@ export default function DeliveryTypeDropdown({ value, setValue }) {
 
     return (
         <Dropdown
-            label={"Delivery type: "}
+            label={"delivery type: "}
             options={DeliverTypeOptions}
             value={value}
             onChange={onChange}

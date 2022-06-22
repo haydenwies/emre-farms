@@ -9,7 +9,6 @@ import Dropdown from '../../components/Dropdown';
 import SortDropdown from './components/SortDropdown';
 import { CircleRegular, CircleCheckSolid, TrashSolid } from '../../assets/Assets';
 import { PrintTemplate } from './components/PrintTemplate';
-import Nav from '../../components/Nav';
 
 import './OrderOverview.css';
 
@@ -160,6 +159,115 @@ export default function OrderOverview() {
                     />
                 </div>
                 {/* ---------- Modal ---------- */}
+                
+                {/* ---------- Main view ---------- */}
+                <div className="actions">
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            selectedOrders.length !== 0 ? setSelectedOrders([]) : setSelectedOrders(orders)
+                        }}
+                    >
+                        {selectedOrders.length !== 0 ? "deselect all" : "select all"}
+                    </button>
+                    <div className="manage-actions">
+                        <button
+                            disabled={selectedOrders.length === 0}
+                            className={selectedOrders.length > 0 ? "" : "disabled"}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (selectedOrders.length > 0) {
+                                    handlePrint();
+                                };
+                            }}
+                        >
+                            print selected
+                        </button>
+                        <button
+                            disabled={selectedOrders.length === 0}
+                            className={selectedOrders.length > 0 ? "" : "disabled"}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (selectedOrders.length > 0) {
+                                    for (const order of selectedOrders) {
+                                        onDelete(order);
+                                    };
+                                };
+                            }}
+                        >
+                            delete selected
+                        </button> 
+                    </div>
+                </div>
+                <div className="sort">
+                    <SortDropdown 
+                        value={sort}
+                        setValue={setSort}
+                        sortCallback = {(sortMethod) => {
+                            dispatchOrders({ type: ORDER_DATA_ACTIONS.SORT, payload: sortMethod })
+                        }}
+                    />
+                </div>
+                <div className="labels">
+                    <div></div>
+                    <p className={"bold"}>client</p>
+                    <p className={"bold"}>delivery type</p>
+                    <p className={"bold"}>due date</p>
+                    <div className="spacer"></div>
+                </div>
+                <div className="orders">
+                    {orders.map((order) => (
+                        <div 
+                            key={order.id}
+                            className={isInSelectedOrders(order) ? "order selected" : "order"}
+                        >
+                            <>
+                                
+                                <button
+                                    className={"select-button"}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (isInSelectedOrders(order)) {
+                                            setSelectedOrders(selectedOrders.filter(x => x.id !== order.id))
+                                        } else {
+                                            setSelectedOrders([...selectedOrders, order])
+                                        }
+                                    }}
+                                >
+                                    {isInSelectedOrders(order) && (
+                                        <img src={CircleCheckSolid} alt="" />
+                                    )}
+                                    {!isInSelectedOrders(order) && (
+                                        <img src={CircleRegular} alt="" />
+                                    )}
+                                </button>
+                                <div className="order-info">
+                                    <p>{order.client}</p>
+                                    <p>{order.deliveryType}</p>
+                                    <p>{order.dueDate}</p>
+                                </div>
+                            </>
+                            <div className="order-actions">
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        dispatchModal({ type: MODAL_ACTIONS.VIEW, payload: order})
+                                    }}  
+                                >
+                                    view
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        dispatchModal({ type: MODAL_ACTIONS.EDIT, payload: order })
+                                    }}
+                                >
+                                    edit
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                 {modal.isOpen && (
                     <div className="modal-frame">
                         <div className="modal">
@@ -289,110 +397,6 @@ export default function OrderOverview() {
                         </div>
                     </div>
                 )}
-                {/* ---------- Main view ---------- */}
-                <div className="actions">
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            selectedOrders.length !== 0 ? setSelectedOrders([]) : setSelectedOrders(orders)
-                        }}
-                    >
-                        {selectedOrders.length !== 0 ? "deselect all" : "select all"}
-                    </button>
-                    <div className="manage-actions">
-                        <button
-                            disabled={selectedOrders.length === 0}
-                            className={selectedOrders.length > 0 ? "" : "disabled"}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                if (selectedOrders.length > 0) {
-                                    handlePrint();
-                                };
-                            }}
-                        >
-                            print selected
-                        </button>
-                        <button
-                            disabled={selectedOrders.length === 0}
-                            className={selectedOrders.length > 0 ? "" : "disabled"}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                if (selectedOrders.length > 0) {
-                                    for (const order of selectedOrders) {
-                                        onDelete(order);
-                                    };
-                                };
-                            }}
-                        >
-                            delete selected
-                        </button> 
-                    </div>
-                </div>
-                <SortDropdown 
-                    value={sort}
-                    setValue={setSort}
-                    sortCallback = {(sortMethod) => {
-                        dispatchOrders({ type: ORDER_DATA_ACTIONS.SORT, payload: sortMethod })
-                    }}
-                />
-                <div className="labels">
-                    <div></div>
-                    <p className={"bold"}>client</p>
-                    <p className={"bold"}>delivery type</p>
-                    <p className={"bold"}>due date</p>
-                    <div className="spacer"></div>
-                </div>
-                {orders.map((order) => (
-                    <div 
-                        key={order.id}
-                        className={isInSelectedOrders(order) ? "order selected" : "order"}
-                    >
-                        <>
-                            
-                            <button
-                                className={"select-button"}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    if (isInSelectedOrders(order)) {
-                                        setSelectedOrders(selectedOrders.filter(x => x.id !== order.id))
-                                    } else {
-                                        setSelectedOrders([...selectedOrders, order])
-                                    }
-                                }}
-                            >
-                                {isInSelectedOrders(order) && (
-                                    <img src={CircleCheckSolid} alt="" />
-                                )}
-                                {!isInSelectedOrders(order) && (
-                                    <img src={CircleRegular} alt="" />
-                                )}
-                            </button>
-                            <div className="order-info">
-                                <p>{order.client}</p>
-                                <p>{order.deliveryType}</p>
-                                <p>{order.dueDate}</p>
-                            </div>
-                        </>
-                        <div className="order-actions">
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    dispatchModal({ type: MODAL_ACTIONS.VIEW, payload: order})
-                                }}  
-                            >
-                                view
-                            </button>
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    dispatchModal({ type: MODAL_ACTIONS.EDIT, payload: order })
-                                }}
-                            >
-                                edit
-                            </button>
-                        </div>
-                    </div>
-                ))}
             </div>
         </div>
     )

@@ -1,6 +1,7 @@
 .nav {
     width: 100%;
     overflow: hidden;
+    z-index: 0;
 }
 .nav img {
     height: 26px;

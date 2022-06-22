@@ -12,6 +12,6 @@
     max-width: 1000px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 40px;
     align-items: flex-start;
 }

@@ -1,5 +1,5 @@
 export const SizeOptions = [
-    {label: "Choose size", value: ""},
+    {label: "choose size", value: ""},
     {label: "Mini Mini", value: "Mini Mini"},
     {label: "Mini", value: "Mini"},
     {label: "B-Size", value: "B-Size"},
@@ -10,7 +10,7 @@ export const SizeOptions = [
 ];
 
 export const TypeOptions = [
-    {label: "Choose type", value: ""},
+    {label: "choose type", value: ""},
     {label: "White", value: "White"},
     {label: "Red", value: "Red"},
     {label: "Yellow flesh", value: "Yellow Flesh"},
@@ -18,9 +18,9 @@ export const TypeOptions = [
 ];
 
 export const OrderSortOptions = [
-    {label: "Due date", value: "dueDate"},
-    {label: "Client", value: "client"},
-    {label: "Delivery type", value: "deliveryType"}
+    {label: "due date", value: "dueDate"},
+    {label: "client", value: "client"},
+    {label: "delivery type", value: "deliveryType"}
 ]
 
 export const ClientSortOptions = [
@@ -28,7 +28,7 @@ export const ClientSortOptions = [
 ]
 
 export const DeliverTypeOptions = [
-    {label: "Choose delivery type", value: ""},
+    {label: "choose delivery type", value: ""},
     {label: "Delivery type 1", value: "type1"},
     {label: "Delivery type 2", value: "type2"},
     {label: "Delivery type 3", value: "type3"}

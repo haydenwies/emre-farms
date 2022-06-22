@@ -2,23 +2,41 @@
     margin: 0 auto;
     max-width: 1000px;
 }
-.order-placement .client-info {
+.order-placement .options {
     display: flex;
     flex-direction: row;
+    gap: 40px;
+}
+.order-placement .client-info {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     flex-wrap: wrap;
     gap: 40px;
 }
 .order-placement .client-dropdown select {
+    margin-bottom: 20px;
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     background-image: url('../../assets/circle-user-solid.svg');
     background-size: 12px;
 }
+.order-placement .client-dropdown input {
+    width: 92%;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
 .order-placement .delivery-type-dropdown select {
+    margin-bottom: 20px;
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     background-image: url('../../assets/truck-solid.svg');
     background-size: 12px;
 }
+.order-placement .delivery-type-dropdown input {
+    width: 95%;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
 .order-placement .due-date input {
+    margin-left: 5px;
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
 }
 .order-placement .item-list {
@@ -76,4 +94,40 @@
 .item-card .type-dropdown select {
     background-image: url('../../assets/list-solid.svg');
     background-size: 12px;
+}
+
+/* ---------- Modal ---------- */
+
+.order-placement .modal-frame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+.order-placement .modal {
+    margin: 0 auto;
+    margin-top: 20vh;
+    padding: 20px;
+    max-width: 400px;
+    max-height: 50vh;
+    min-height: fit-content;
+    /* height: 100%; */
+    border-radius: 10px;
+    background-color: white;
+}
+.order-placement .modal .options {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.order-placement .modal .client-info {
+    margin: 40px auto;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
 }

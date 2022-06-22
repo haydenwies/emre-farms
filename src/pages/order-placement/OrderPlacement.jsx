@@ -8,9 +8,9 @@ import ItemCard from './components/ItemCard';
 import ClientDropdown from './components/ClientDropdown';
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import { CirclePlusSolid } from '../../assets/Assets'
-import Nav from '../../components/Nav';
 
 import './OrderPlacement.css';
+import AddClientModal from './components/AddClientModal';
 
 const ORDER_DATA_ACTIONS = {
     ADD: "add",
@@ -34,12 +34,14 @@ const ordersReducer = (order, action) => {
 
 export default function OrderPlacement() {
     // Data
-    const [order, dispatchOrder] = useReducer(ordersReducer, { client: {name: ""}, deliveryType: "", dueDate: "", order: [] });
+    const [order, dispatchOrder] = useReducer(ordersReducer, { client: "", deliveryType: "", dueDate: "", order: [] });
     // For client dropdown and setting preferred delivery type
     const [clients, setClients] = useState([]);
     const [clientOptions, setClientOptions] = useState([{ label: "Choose a client", value: "" }]);
     // Managing state of view components
     const [buttonText, setButtonText] = useState("submit order");
+    const [showModal, setShowModal] = useState(false);
+    const [otherClient, setOtherClient] = useState("");
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -52,16 +54,28 @@ export default function OrderPlacement() {
                 // On second click save to database, reset order and button text
                 const timestamp = datetimeString();
                 const docRef = doc(collection(db, "orders-incomplete"));
-                await setDoc(docRef, {
-                    client: order.client,
-                    deliveryType: order.deliveryType,
-                    dueDate: order.dueDate,
-                    id: docRef.id,
-                    order: order.order,
-                    orderDate: timestamp
-                });
+                if (order.client === "other") {
+                    await setDoc(docRef, {
+                        client: otherClient,
+                        deliveryType: order.deliveryType,
+                        dueDate: order.dueDate,
+                        id: docRef.id,
+                        order: order.order,
+                        orderDate: timestamp
+                    });
+                } else {
+                    await setDoc(docRef, {
+                        client: order.client,
+                        deliveryType: order.deliveryType,
+                        dueDate: order.dueDate,
+                        id: docRef.id,
+                        order: order.order,
+                        orderDate: timestamp
+                    });
+                };
                 dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET });
                 setButtonText("submit order")
+                setOtherClient("");
             };
         } else {
             // Return error: order incomplete
@@ -70,18 +84,18 @@ export default function OrderPlacement() {
     };
 
     const isValidOrder = () => {
-        if (
-            order.client !== "" &&
+        if (order.client !== "" &&
             order.deliveryType !== "" &&
             order.dueDate !== "" &&
+            order.order.length > 0 &&
             order.order.filter(
-                x => x.size !== "" &&
-                x.type !== "" && 
-                x.quantity !== 0 &&
-                x.size !== undefined &&
-                x.type !== undefined && 
-                x.quantity !== undefined
-            ).length > 0
+                x => x.size === "" ||
+                x.type === "" || 
+                x.quantity === 0 ||
+                x.size === undefined ||
+                x.type === undefined || 
+                x.quantity === undefined
+            ).length === 0
         ) {
             return true
         } else {
@@ -89,37 +103,62 @@ export default function OrderPlacement() {
         };
     };
 
-    useEffect(() => {
-        const getClients = async () => {
-            const quereySnapshot = await getDocs(collection(db, "clients"));
-            const newClients = [];
-            quereySnapshot.forEach((doc) => {
-                if (newClients.filter(x => x.id === doc.id).length === 0) {
-                    newClients.push(doc.data());
-                };
-            });
-            const newClientOptions = [{ label: "Choose a client", value: "" }];
-            for (const client of newClients) {
-                newClientOptions.push({ label: client.name, value: client.name });
-            };
-            setClients(newClients);
-            setClientOptions(newClientOptions);
+    const isValidItems = () => {
+        if (order.order.filter(
+            x => x.size === "" ||
+            x.type === "" || 
+            x.quantity === 0 ||
+            x.size === undefined ||
+            x.type === undefined || 
+            x.quantity === undefined
+        ).length === 0) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    const getClients = async () => {
+        const quereySnapshot = await getDocs(collection(db, "clients"));
+        const newClients = [];
+        quereySnapshot.forEach((doc) => {
+            newClients.push(doc.data());
+        });
+        const newClientOptions = [{ label: "choose a client", value: "" }];
+        for (const client of newClients) {
+            newClientOptions.push({ label: client.name, value: client.name });
         };
+        setClients(newClients);
+        setClientOptions(newClientOptions);
+    };
+
+    useEffect(() => {
         getClients();
     }, []);
 
     return (
+        
         <div className='order-placement'>
-            {/* <Nav /> */}
             <div className='pannel'>
-                <button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET })
-                    }}
-                >
-                    reset
-                </button>
+                <div className="options">
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET })
+                            setButtonText("submit order")
+                        }}
+                    >
+                        reset
+                    </button>
+                    <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setShowModal(true)
+                            }}
+                        >
+                        add client
+                    </button>
+                </div>
                 <div className="client-info">
                     <div className="client-dropdown">
                         <ClientDropdown 
@@ -127,37 +166,62 @@ export default function OrderPlacement() {
                             value={order.client}
                             setValue={(client) => {
                                 const selectedClient = clients.find(x => x.name === client)
-                                dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
-                                    payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
-                                })
+                                setButtonText("submit order")
+                                // Throws error when re-selectcting "choose client" because no preferred delivery type
+                                try {
+                                    dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
+                                        payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
+                                    })
+                                } catch (err) {
+                                    console.log(err);
+                                }
                             }}
                             options={clientOptions}
                         />
+                        {order.client === "other" && (
+                            <input 
+                            type="text" 
+                            placeholder='other client name'
+                            defaultValue={otherClient}
+                            onChange={(e) => {
+                                setOtherClient(e.target.value);
+                            }}
+                        />
+                        )}
                     </div>
                     <div className="delivery-type-dropdown">
                         <DeliveryTypeDropdown 
                             value={order.deliveryType}
                             setValue={(deliveryType) => {
+                                setButtonText("submit order")
                                 dispatchOrder({ 
                                     type: ORDER_DATA_ACTIONS.MODIFY,
                                     payload: { client: order.client, deliveryType: deliveryType, dueDate: order.dueDate, order: order.order }
                                 })
                             }}
                         />
+                        
+                        <input 
+                            type="text" 
+                            placeholder='address'
+                        />
+                    </div>
+                    <div className="due-date">
+                        due date:
+                        <input 
+                            type={"date"}
+                            value={order.dueDate}
+                            onChange={(e) => {
+                                setButtonText("submit order")
+                                dispatchOrder({ 
+                                    type: ORDER_DATA_ACTIONS.MODIFY,
+                                    payload: { client: order.client, deliveryType: order.deliveryType, dueDate: e.target.value, order: order.order }
+                                })
+                            }}
+                        />
                     </div>
                 </div>
-                <div className="due-date">
-                    <input 
-                        type={"date"}
-                        value={order.dueDate}
-                        onChange={(e) => {
-                            dispatchOrder({ 
-                                type: ORDER_DATA_ACTIONS.MODIFY,
-                                payload: { client: order.client, deliveryType: order.deliveryType, dueDate: e.target.value, order: order.order }
-                            })
-                        }}
-                    />
-                </div>
+                
                 {/* Item cards */}
                 <div className={"item-list"}>
                     {order.order.map((item) => (
@@ -169,6 +233,7 @@ export default function OrderPlacement() {
                                 id={item.id}
                                 order={order.order}
                                 setOrder={(newOrder) => {
+                                    setButtonText("submit order")
                                     dispatchOrder({ 
                                         type: ORDER_DATA_ACTIONS.MODIFY,
                                         payload: { client: order.client, deliveryType: order.deliveryType, dueDate: order.dueDate, order: newOrder }
@@ -181,7 +246,13 @@ export default function OrderPlacement() {
                         className={"add-button"}
                         onClick={(e) => {
                             e.preventDefault();
-                            dispatchOrder({ type: ORDER_DATA_ACTIONS.ADD })
+                            setButtonText("submit order")
+                            if (isValidItems()) {
+                                dispatchOrder({ type: ORDER_DATA_ACTIONS.ADD })
+                            } else {
+                                window.alert("Fill in or delete incomplete item before adding another.")
+                            }
+                            
                         }}
                     >
                         <img src={CirclePlusSolid} alt="" />
@@ -193,7 +264,12 @@ export default function OrderPlacement() {
                 >
                     {buttonText}
                 </button>
-                
+                {showModal && (
+                    <AddClientModal 
+                        getClients={getClients}
+                        setShowModal={setShowModal}
+                    />
+                )}
             </div>
         </div>
     )

@@ -11,7 +11,7 @@ export default function SortDropdown({ value, setValue, sortCallback }) {
 
     return (
         <Dropdown
-            label={"Sort by: "}
+            label={"sort by: "}
             options={ClientSortOptions}
             value={value}
             onChange={onChange}
