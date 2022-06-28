@@ -50,7 +50,7 @@
 .order-placement .add-button {
     margin: 0;
     padding: 76px 79px;
-    background-color: rgb(169,169,169);
+    background-color: rgb(177,187,30);
 }
 .order-placement .add-button img {
     margin: 0;
@@ -69,7 +69,9 @@
     justify-content: center;
     gap: 10px;
     border-radius: 10px;
-    background-color: rgb(169,169,169);
+    /* background-color: rgb(169,169,169); */
+    background-color: rgb(177,187,30);
+    /* box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px; */
 }
 .item-options {
     display: flex;
@@ -78,10 +80,11 @@
 }
 .item-card select {
     width: 160px;
-    
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
 }
 .item-card input {
     width: 144px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
 }
 .item-card button {
     margin: 0 auto;
@@ -96,7 +99,7 @@
     background-size: 12px;
 }
 
-/* ---------- Modal ---------- */
+/* ---------- Generic Modal Content ---------- */
 
 .order-placement .modal-frame {
     position: fixed;
@@ -107,7 +110,10 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 2;
 }
-.order-placement .modal {
+
+/* ---------- AddClientModal ---------- */
+
+.order-placement .add-client-modal {
     margin: 0 auto;
     margin-top: 20vh;
     padding: 20px;
@@ -118,16 +124,60 @@
     border-radius: 10px;
     background-color: white;
 }
-.order-placement .modal .options {
+.order-placement .add-client-modal .options {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     flex-wrap: wrap;
 }
-.order-placement .modal .client-info {
+.order-placement .add-client-modal .client-info {
     margin: 40px auto;
     width: fit-content;
     display: flex;
     flex-direction: column;
     gap: 40px;
+}
+
+/* ---------- ConfirmOrderModal ---------- */
+.order-placement .confirm-order-modal {
+    position: relative;
+    margin: 0 auto;
+    margin-top: 10vh;
+    padding: 20px;
+    max-width: 800px;
+    max-height: 70vh;
+    min-height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+    height: 100%;
+    overflow-y: scroll;
+    border-radius: 10px;
+    background-color: white;
+}
+.order-placement .confirm-order-modal button {
+    margin: 0 auto;
+    width: 18rem;
+}
+.order-placement .confirm-order-modal .submit {
+    color: black;
+    background-color: rgb(177,187,30);
+}
+.order-placement .confirm-order-modal .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: fit-content;
+}
+.order-placement .confirm-order-modal .order-info {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+.order-placement .confirm-order-modal .items {
+    width: 800px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    row-gap: 20px;
 }

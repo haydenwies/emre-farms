@@ -7,7 +7,7 @@ import { SizeOptions, TypeOptions } from '../../backend/tempSettings';
 
 import Dropdown from '../../components/Dropdown';
 import SortDropdown from './components/SortDropdown';
-import { CircleRegular, CircleCheckSolid, TrashSolid } from '../../assets/Assets';
+import { CircleRegular, CircleCheckSolid } from '../../assets/Assets';
 import { PrintTemplate } from './components/PrintTemplate';
 
 import './OrderOverview.css';
@@ -23,6 +23,7 @@ const MODAL_ACTIONS = {
     VIEW: 'view',
     EDIT: 'edit',
     CLOSE: 'close',
+    ADD_ITEM: 'addItem',
     UPDATE_ITEM: 'updateItem',
     DELETE_ITEM: 'deleteItem'
 };
@@ -52,9 +53,26 @@ const modalReducer = (modal, action) => {
             return { isOpen: true, isEditing: true, changesMade: false, order: action.payload };
         case MODAL_ACTIONS.CLOSE:
             return { isOpen: false, isEditing: false, changesMade: false, order: action.payload };
+        case MODAL_ACTIONS.ADD_ITEM:
+            const newItem = {
+                id: Date.now(),
+                // quantity: 0,
+                size: "",
+                type: ""
+            }
+            const addedItemOrder = {
+                client: modal.order.client,
+                deliveryAddress: modal.order.deliveryAddress,
+                deliveryType: modal.order.deliveryType,
+                id: modal.order.id,
+                orderDate: modal.order.orderDate,
+                order: [...modal.order.order, newItem]
+            };
+            return { isOpen: true, isEditing: true, changesMade: true, order: addedItemOrder };
         case MODAL_ACTIONS.UPDATE_ITEM:
             const updatedItemOrder = {
                 client: modal.order.client,
+                deliveryAddress: modal.order.deliveryAddress,
                 deliveryType: modal.order.deliveryType,
                 id: modal.order.id,
                 orderDate: modal.order.orderDate,
@@ -64,6 +82,7 @@ const modalReducer = (modal, action) => {
         case MODAL_ACTIONS.DELETE_ITEM:
             const deletedItemOrder = {
                 client: modal.order.client,
+                deliveryAddress: modal.order.deliveryAddress,
                 deliveryType: modal.order.deliveryType,
                 id: modal.order.id,
                 orderDate: modal.order.orderDate,
@@ -86,9 +105,10 @@ export default function OrderOverview() {
     const printRef = useRef();
     // For managing state on page
     const [deleteButtonText, setDeleteButtonText] = useState("delete")
+    const [deleteSelectedButtonText, setDeleteSelectedButtonText] = useState("delete selected")
 
     // ---------- Take order updated in modal and push changes to database ----------
-    const onUpdate = async (order) => {
+    const onUpdate = async (order) => {       
         const orderRef = doc(db, "orders-incomplete", order.id);
         setDoc(orderRef, order, { merge: true });
     };
@@ -179,6 +199,7 @@ export default function OrderOverview() {
                                 if (selectedOrders.length > 0) {
                                     handlePrint();
                                 };
+                                setSelectedOrders([])
                             }}
                         >
                             print selected
@@ -188,14 +209,20 @@ export default function OrderOverview() {
                             className={selectedOrders.length > 0 ? "" : "disabled"}
                             onClick={(e) => {
                                 e.preventDefault();
-                                if (selectedOrders.length > 0) {
-                                    for (const order of selectedOrders) {
-                                        onDelete(order);
+                                if (deleteSelectedButtonText === "delete selected") {
+                                    setDeleteSelectedButtonText("confirm delete");
+                                } else {
+                                    if (selectedOrders.length > 0) {
+                                        for (const order of selectedOrders) {
+                                            onDelete(order);
+                                        };
                                     };
+                                    setDeleteSelectedButtonText("delete selected");
+                                    setSelectedOrders([])
                                 };
                             }}
                         >
-                            delete selected
+                            {deleteSelectedButtonText}
                         </button> 
                     </div>
                 </div>
@@ -272,11 +299,12 @@ export default function OrderOverview() {
                     <div className="modal-frame">
                         <div className="modal">
                             <div className="modal-actions">
-                                <div className="left">
+                                <div className="button-group">
                                     <button 
                                         onClick={(e) => {
                                             e.preventDefault();
                                             dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
+                                            setDeleteButtonText("delete")
                                         }}
                                     >
                                         close
@@ -287,33 +315,72 @@ export default function OrderOverview() {
                                             className={modal.changesMade ? "" : "disabled"}
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                onUpdate(modal.order)
-                                                dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null })
+                                                if (modal.order.order.filter((x) => 
+                                                    x.size === "" ||
+                                                    x.type === "" ||
+                                                    (x.quantity < 1 || x.quantity === undefined)
+                                                ).length > 0) {
+                                                    window.alert("One or more items is not complete.")
+                                                } else {
+                                                    onUpdate(modal.order)
+                                                    dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null })
+                                                }
                                             }}
                                         >
                                             save
                                         </button>
                                     )}
+                                </div>
+                                {!modal.isEditing && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            dispatchModal({ type: MODAL_ACTIONS.EDIT, payload: modal.order })
+                                        }}
+                                    >
+                                        edit
+                                    </button>
+                                )}
+                                {modal.isEditing && (
+                                    <div className="button-group">
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                if (deleteButtonText === "delete") {
+                                                    setDeleteButtonText("confirm delete")
+                                                } else {
+                                                    onDelete(modal.order);
+                                                    dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
+                                                    setDeleteButtonText("delete")
+                                                }
+                                            }}
+                                        >
+                                            {deleteButtonText}
+                                        </button>
+                                        {deleteButtonText === "confirm delete" && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setDeleteButtonText("delete")
+                                                }}
+                                            >
+                                                cancel delete
+                                            </button>
+                                        )}
                                     </div>
-                                <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        if (deleteButtonText === "delete") {
-                                            setDeleteButtonText("confirm delete")
-                                        } else {
-                                            onDelete(modal.order);
-                                            dispatchModal({ type: MODAL_ACTIONS.CLOSE, payload: null });
-                                            setDeleteButtonText("delete")
-                                        }
-                                    }}
-                                >
-                                    {deleteButtonText}
-                                </button>
+                                )}
                             </div>
                             <div className="modal-content">
-                                <h1>Client: {modal.order.client}</h1>
-                                <p>Delivery type: {modal.order.deliveryType}</p>
-                                <p>Order date: {modal.order.orderDate} GMT</p>
+                                <h1>client: {modal.order.client}</h1>
+
+                                <p>
+                                    <span className="bold">delivery type:</span>
+                                    <span>{modal.order.deliveryType === "Delivery" ? ` Delivery to ${modal.order.deliveryAddress}` : ` ${modal.order.deliveryType}`}</span>
+                                </p>
+                                <p>
+                                    <span className="bold">order date:</span>
+                                    <span>{` ${modal.order.orderDate} GMT`}</span>
+                                </p>
                                 <div className="order-item-list">
                                     {modal.order.order.map((item) => (
                                         <div 
@@ -376,11 +443,12 @@ export default function OrderOverview() {
                                                             e.preventDefault();
                                                             dispatchModal({ 
                                                                 type: MODAL_ACTIONS.DELETE_ITEM, 
-                                                                payload: item })
-                                                            }}
+                                                                payload: item 
+                                                            })
+                                                        }}
                                                     >
-                                                        <img src={TrashSolid} alt="" />
-                                                    </button>
+                                                        delete item
+                                                    </button>                                                  
                                                 </>
                                             )}
                                             {!modal.isEditing && (
@@ -393,6 +461,16 @@ export default function OrderOverview() {
                                         </div>
                                     ))}
                                 </div>
+                                {modal.isEditing && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            dispatchModal({ type: MODAL_ACTIONS.ADD_ITEM })
+                                        }}
+                                    >
+                                        add item
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

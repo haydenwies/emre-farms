@@ -8,9 +8,10 @@ import ItemCard from './components/ItemCard';
 import ClientDropdown from './components/ClientDropdown';
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import { CirclePlusSolid } from '../../assets/Assets'
+import AddClientModal from './components/AddClientModal';
+import ConfirmOrderModal from './components/ConfirmOrderModal';
 
 import './OrderPlacement.css';
-import AddClientModal from './components/AddClientModal';
 
 const ORDER_DATA_ACTIONS = {
     ADD: "add",
@@ -22,11 +23,11 @@ const ordersReducer = (order, action) => {
     switch (action.type) {
         case ORDER_DATA_ACTIONS.ADD:
             // Add a new item to order
-            return { client: order.client, deliveryType: order.deliveryType, dueDate: order.dueDate, order: [...order.order, { id: Date.now() }] };
+            return { client: order.client, deliveryType: order.deliveryType, deliveryAddress: order.deliveryAddress, dueDate: order.dueDate, order: [...order.order, { id: Date.now() }] };
         case ORDER_DATA_ACTIONS.MODIFY:
             return action.payload;
         case ORDER_DATA_ACTIONS.RESET:
-            return { client: "", deliveryType: "", dueDate: "", order: [] };
+            return { client: "", deliveryType: "", address: "", dueDate: "", order: [] };
         default:
             return order
     };
@@ -34,30 +35,33 @@ const ordersReducer = (order, action) => {
 
 export default function OrderPlacement() {
     // Data
-    const [order, dispatchOrder] = useReducer(ordersReducer, { client: "", deliveryType: "", dueDate: "", order: [] });
+    const [order, dispatchOrder] = useReducer(ordersReducer, { client: "", deliveryType: "", deliveryAddress: "", dueDate: "", order: [] });
     // For client dropdown and setting preferred delivery type
     const [clients, setClients] = useState([]);
     const [clientOptions, setClientOptions] = useState([{ label: "Choose a client", value: "" }]);
     // Managing state of view components
-    const [buttonText, setButtonText] = useState("submit order");
-    const [showModal, setShowModal] = useState(false);
+    const [showAddClient, setShowAddClient] = useState(false); // Modal
+    const [showConfirmOrder, setShowConfirmOrder] = useState(false); // Modal
+    // const [buttonText, setButtonText] = useState("submit order");
     const [otherClient, setOtherClient] = useState("");
 
     const onSubmit = async (e) => {
         e.preventDefault();
         // Check if order is valid
         if (isValidOrder()) {
-            if (buttonText === "submit order") {
+            if (!showConfirmOrder) {
                 // Toggle button text on first click
-                setButtonText("confirm submit");
+                setShowConfirmOrder(true);
             } else {
                 // On second click save to database, reset order and button text
                 const timestamp = datetimeString();
                 const docRef = doc(collection(db, "orders-incomplete"));
+                const address = order.deliveryType === "Delivery" ? order.deliveryAddress : ""
                 if (order.client === "other") {
                     await setDoc(docRef, {
                         client: otherClient,
                         deliveryType: order.deliveryType,
+                        deliveryAddress: address,
                         dueDate: order.dueDate,
                         id: docRef.id,
                         order: order.order,
@@ -67,6 +71,7 @@ export default function OrderPlacement() {
                     await setDoc(docRef, {
                         client: order.client,
                         deliveryType: order.deliveryType,
+                        deliveryAddress: address,
                         dueDate: order.dueDate,
                         id: docRef.id,
                         order: order.order,
@@ -74,7 +79,8 @@ export default function OrderPlacement() {
                     });
                 };
                 dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET });
-                setButtonText("submit order")
+                // setButtonText("submit order")
+                setShowConfirmOrder(false)
                 setOtherClient("");
             };
         } else {
@@ -97,7 +103,12 @@ export default function OrderPlacement() {
                 x.quantity === undefined
             ).length === 0
         ) {
-            return true
+            if ((order.client === "other" && otherClient === "") ||
+            (order.deliveryType === "Delivery" && order.deliveryAddress === "")) {
+                return false
+            } else {
+                return true
+            }
         } else {
             return false
         };
@@ -145,7 +156,8 @@ export default function OrderPlacement() {
                         onClick={(e) => {
                             e.preventDefault();
                             dispatchOrder({ type: ORDER_DATA_ACTIONS.RESET })
-                            setButtonText("submit order")
+                            // setButtonText("submit order")
+                            setShowConfirmOrder(false);
                         }}
                     >
                         reset
@@ -153,7 +165,7 @@ export default function OrderPlacement() {
                     <button
                             onClick={(e) => {
                                 e.preventDefault();
-                                setShowModal(true)
+                                setShowAddClient(true)
                             }}
                         >
                         add client
@@ -166,11 +178,12 @@ export default function OrderPlacement() {
                             value={order.client}
                             setValue={(client) => {
                                 const selectedClient = clients.find(x => x.name === client)
-                                setButtonText("submit order")
+                                // setButtonText("submit order")
+                                setShowConfirmOrder(false);
                                 // Throws error when re-selectcting "choose client" because no preferred delivery type
                                 try {
                                     dispatchOrder({ type: ORDER_DATA_ACTIONS.MODIFY, 
-                                        payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, dueDate: order.dueDate, order: order.order }
+                                        payload:  { client: client, deliveryType: selectedClient.preferredDeliveryType, deliveryAddress: selectedClient.preferredDeliveryAddress, dueDate: order.dueDate, order: order.order }
                                     })
                                 } catch (err) {
                                     console.log(err);
@@ -193,18 +206,29 @@ export default function OrderPlacement() {
                         <DeliveryTypeDropdown 
                             value={order.deliveryType}
                             setValue={(deliveryType) => {
-                                setButtonText("submit order")
+                                // setButtonText("submit order")
+                                setShowConfirmOrder(false);
                                 dispatchOrder({ 
                                     type: ORDER_DATA_ACTIONS.MODIFY,
-                                    payload: { client: order.client, deliveryType: deliveryType, dueDate: order.dueDate, order: order.order }
+                                    payload: { client: order.client, deliveryType: deliveryType, deliveryAddress: order.deliveryAddress, dueDate: order.dueDate, order: order.order }
                                 })
                             }}
                         />
-                        
-                        <input 
-                            type="text" 
-                            placeholder='address'
-                        />
+                        {order.deliveryType === "Delivery" && (                        
+                            <input 
+                                type="text" 
+                                placeholder='address'
+                                value={order.deliveryAddress}
+                                onChange={(e) => {
+                                    // setButtonText("submit order")
+                                    setShowConfirmOrder(false);
+                                    dispatchOrder({ 
+                                        type: ORDER_DATA_ACTIONS.MODIFY,
+                                        payload: { client: order.client, deliveryType: order.deliveryType, deliveryAddress: e.target.value, dueDate: order.dueDate, order: order.order }
+                                    })
+                                }}
+                            />
+                        )}
                     </div>
                     <div className="due-date">
                         due date:
@@ -212,10 +236,11 @@ export default function OrderPlacement() {
                             type={"date"}
                             value={order.dueDate}
                             onChange={(e) => {
-                                setButtonText("submit order")
+                                // setButtonText("submit order")
+                                setShowConfirmOrder(false);
                                 dispatchOrder({ 
                                     type: ORDER_DATA_ACTIONS.MODIFY,
-                                    payload: { client: order.client, deliveryType: order.deliveryType, dueDate: e.target.value, order: order.order }
+                                    payload: { client: order.client, deliveryType: order.deliveryType, deliveryAddress: order.deliveryAddress, dueDate: e.target.value, order: order.order }
                                 })
                             }}
                         />
@@ -233,10 +258,11 @@ export default function OrderPlacement() {
                                 id={item.id}
                                 order={order.order}
                                 setOrder={(newOrder) => {
-                                    setButtonText("submit order")
+                                    // setButtonText("submit order")
+                                    setShowConfirmOrder(false);
                                     dispatchOrder({ 
                                         type: ORDER_DATA_ACTIONS.MODIFY,
-                                        payload: { client: order.client, deliveryType: order.deliveryType, dueDate: order.dueDate, order: newOrder }
+                                        payload: { client: order.client, deliveryType: order.deliveryType, deliveryAddress: order.deliveryAddress, dueDate: order.dueDate, order: newOrder }
                                     })
                                 }}
                             />
@@ -246,7 +272,8 @@ export default function OrderPlacement() {
                         className={"add-button"}
                         onClick={(e) => {
                             e.preventDefault();
-                            setButtonText("submit order")
+                            // setButtonText("submit order")
+                            setShowConfirmOrder(false);
                             if (isValidItems()) {
                                 dispatchOrder({ type: ORDER_DATA_ACTIONS.ADD })
                             } else {
@@ -262,12 +289,19 @@ export default function OrderPlacement() {
                 <button
                     onClick={onSubmit}
                 >
-                    {buttonText}
+                    submit order
                 </button>
-                {showModal && (
+                {showAddClient && (
                     <AddClientModal 
                         getClients={getClients}
-                        setShowModal={setShowModal}
+                        setShowModal={setShowAddClient}
+                    />
+                )}
+                {showConfirmOrder && (
+                    <ConfirmOrderModal 
+                        order={order}
+                        otherClient={otherClient}
+                        setShowConfirmOrder={setShowConfirmOrder}
                     />
                 )}
             </div>

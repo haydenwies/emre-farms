@@ -16,6 +16,9 @@
     gap: 20px;
     /* align-items: flex-start; */
 }
+.clients .options-view select {
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
 .clients .client-list {
     margin-top: 20px;
     display: flex;
@@ -28,7 +31,7 @@
     padding: 20px;
     border-radius: 10px;
     /* background-color: rgb(220,220,220); */
-    background-color: rgb(169,169,169);
+    background-color: rgb(177,187,30);
 }
 .clients .client-pannel {
     display: flex;
@@ -52,5 +55,13 @@
 .clients .client-pannel .info {
     display: flex;
     flex-direction: column;
+    gap: 40px;
+}
+.clients .client-pannel .info .delivery {
+    display: flex;
+    flex-direction: column;
     gap: 20px;
+}
+.clients .client-pannel .info .delivery input {
+    width: 95.6%;
 }

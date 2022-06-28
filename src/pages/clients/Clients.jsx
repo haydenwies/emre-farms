@@ -1,7 +1,9 @@
 import { useEffect, useReducer, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { collection, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 import { db } from '../../backend/config';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
 import DeliveryTypeDropdown from './components/DeliveryTypeDropdown';
 import SortDropdown from './components/SortDropdown';
@@ -43,7 +45,11 @@ const selectedReducer = (selectedClient, action) => {
     switch (action.type) {
         // Used when adding new client into the system
         case SELECTED_CLIENT_ACTIONS.ADD:
-            return { isOpen: true, isEditing: true, client: { name: "", preferredDeliveryType: "" } };
+            return { 
+                isOpen: true, 
+                isEditing: true, 
+                client: { name: "", preferredDeliveryAddress: "", preferredDeliveryType: "" } 
+            };
         // Used when client from list is selected - opens selected view
         case SELECTED_CLIENT_ACTIONS.SELECT:
             return { isOpen: true, isEditing: false, client: action.payload };
@@ -66,6 +72,8 @@ export default function Customers() {
     // For managing state of components on page
     const [buttonText, setButtonText] = useState("delete");
 
+    const { userType } = useAuthContext();
+
     // ---------- Add new customer to database ----------
     const onSave = async () => {
         if (selected.client.name.toLowerCase() !== "other") {
@@ -81,6 +89,7 @@ export default function Customers() {
                     await setDoc(docRef, {
                         name: selected.client.name,
                         id: docRef.id,
+                        preferredDeliveryAddress: selected.client.preferredDeliveryAddress,
                         preferredDeliveryType: selected.client.preferredDeliveryType
                     });
                     dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
@@ -110,7 +119,11 @@ export default function Customers() {
             if (clients.filter(x => x.id === client.id).length > 0) {
                 return true;
             } else {
-                return false;
+                if (client.name !== "other") {
+                    return false;
+                } else {
+                    return true
+                };
             };
         };
         const unsub = onSnapshot(collection(db, "clients"), (snapshot) => {
@@ -137,146 +150,183 @@ export default function Customers() {
         };
     }, []);
 
-    return (
-        <div className='clients'>
-            {/* <Nav /> */}
-            <div className="pannel">
-                <div className="options-view">
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.ADD })
-                        }}
-                    >
-                        add
-                    </button>
-                    <SortDropdown 
-                        value={sort}
-                        setValue={setSort}
-                        sortCallback={(sortMethod) => {
-                            dispatchClients({ type: CLIENT_DATA_ACTIONS.SORT, payload: sortMethod })
-                        }}
-                    />
-                    <div className="client-list">
-                        {clients.map((client) => (
-                            <div 
-                                key={client.id}
-                                onClick={() => {
-                                    dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.SELECT, payload: client })}
-                                }
-                            >
-                                <p>{client.name}</p>
-                            </div>
-                        ))}
+    if (userType !== "admin") {
+        return <Navigate to={"/"} />
+    } else {
+        return (
+            <div className='clients'>
+                {/* <Nav /> */}
+                <div className="pannel">
+                    <div className="options-view">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.ADD })
+                            }}
+                        >
+                            add
+                        </button>
+                        <SortDropdown 
+                            value={sort}
+                            setValue={setSort}
+                            sortCallback={(sortMethod) => {
+                                dispatchClients({ type: CLIENT_DATA_ACTIONS.SORT, payload: sortMethod })
+                            }}
+                        />
+                        <div className="client-list">
+                            {clients.map((client) => (
+                                <div 
+                                    key={client.id}
+                                    onClick={() => {
+                                        dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.SELECT, payload: client })}
+                                    }
+                                >
+                                    <p>{client.name}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-                {/* ---------- Selected client ---------- */}
-                {selected.isOpen && (
-                    <div className="selection-view">
-                        {selected.isEditing && (
-                            <div className="client-pannel">
-                                <div className="actions">
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
-                                            setButtonText("delete")
-                                        }}
-                                    >
-                                        close
-                                    </button>
-                                    <div className="actions-more">
-                                        <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            onSave();
-                                            setButtonText("delete")
-                                        }}
-                                        >
-                                            save    
-                                        </button> 
+                    {/* ---------- Selected client ---------- */}
+                    {selected.isOpen && (
+                        <div className="selection-view">
+                            {selected.isEditing && (
+                                <div className="client-pannel">
+                                    <div className="actions">
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                if (selected.client.id) {
-                                                    if (buttonText === "delete") {
-                                                        setButtonText("confirm delete")
-                                                    } else {
-                                                        onDelete();
-                                                        setButtonText("delete")
-                                                    }
-                                                } else {
-                                                    dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE })
-                                                }
+                                                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+                                                setButtonText("delete")
                                             }}
                                         >
-                                            {selected.client.id ? buttonText : "cancel"}
+                                            close
                                         </button>
+                                        <div className="actions-more">
+                                            <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onSave();
+                                                setButtonText("delete")
+                                            }}
+                                            >
+                                                save    
+                                            </button> 
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    if (selected.client.id) {
+                                                        if (buttonText === "delete") {
+                                                            setButtonText("confirm delete")
+                                                        } else {
+                                                            onDelete();
+                                                            setButtonText("delete")
+                                                        }
+                                                    } else {
+                                                        dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE })
+                                                    }
+                                                }}
+                                            >
+                                                {selected.client.id ? buttonText : "cancel"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="info">
+                                        <input 
+                                            type="text" 
+                                            value={selected.client.name}
+                                            placeholder={"client name"}
+                                            onChange={(e) => {
+                                                dispatchSelected({
+                                                    type: SELECTED_CLIENT_ACTIONS.MODIFY,
+                                                    payload: { 
+                                                        name: e.target.value, 
+                                                        id: selected.client.id, 
+                                                        preferredDeliveryAddress: selected.client.preferredDeliveryAddress,
+                                                        preferredDeliveryType: selected.client.preferredDeliveryType
+                                                    }
+                                                });
+                                            }}
+                                        />
+                                        <div className="delivery">
+                                            <DeliveryTypeDropdown 
+                                                value={selected.client.preferredDeliveryType}
+                                                setValue={(value) => {
+                                                    dispatchSelected({ 
+                                                        type: SELECTED_CLIENT_ACTIONS.MODIFY,
+                                                        payload: {
+                                                            name: selected.client.name,
+                                                            id: selected.client.id,
+                                                            preferredDeliveryAddress: selected.client.preferredDeliveryAddress,
+                                                            preferredDeliveryType: value
+                                                        }
+                                                    });
+                                                }}
+                                            />  
+                                            {selected.client.preferredDeliveryType === "Delivery" && (
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Preferred delivery address"
+                                                    value={selected.client.preferredDeliveryAddress}
+                                                    onChange={(e) => {
+                                                        dispatchSelected({
+                                                            type: SELECTED_CLIENT_ACTIONS.MODIFY,
+                                                            payload: { 
+                                                                name: selected.client.name, 
+                                                                id: selected.client.id, 
+                                                                preferredDeliveryAddress: e.target.value,
+                                                                preferredDeliveryType: selected.client.preferredDeliveryType
+                                                            }
+                                                        });
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="info">
-                                    <input 
-                                        type="text" 
-                                        value={selected.client.name}
-                                        placeholder={"client name"}
-                                        onChange={(e) => {
-                                            dispatchSelected({
-                                                type: SELECTED_CLIENT_ACTIONS.MODIFY,
-                                                payload: { 
-                                                    name: e.target.value, 
-                                                    id: selected.client.id, 
-                                                    preferredDeliveryType: selected.client.preferredDeliveryType
-                                                }
-                                            });
-                                        }}
-                                    />
-                                    <DeliveryTypeDropdown 
-                                        value={selected.client.preferredDeliveryType}
-                                        setValue={(value) => {
-                                            dispatchSelected({ 
-                                                type: SELECTED_CLIENT_ACTIONS.MODIFY,
-                                                payload: {
-                                                    name: selected.client.name,
-                                                    id: selected.client.id,
-                                                    preferredDeliveryType: value
-                                                }
-                                            });
-                                        }}
-                                    />
+                            )}
+                            {!selected.isEditing && (
+                                <div className="client-pannel">
+                                    <div className="actions">
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
+                                                setButtonText("delete")
+                                            }}
+                                        >
+                                            close
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.MODIFY, payload: selected.client })
+                                                setButtonText("delete")
+                                            }}
+                                        >
+                                            edit
+                                        </button>
+                                    </div>
+                                    <div className="info">
+                                        <h1>{selected.client.name}</h1>
+                                        {selected.client.preferredDeliveryType !== "Delivery" && (
+                                            <p>
+                                                <span className='bold'>Preferred delivery type: </span>
+                                                {selected.client.preferredDeliveryType}
+                                            </p>
+                                        )}
+                                        {selected.client.preferredDeliveryType === "Delivery" && (
+                                            <p>
+                                                <span className='bold'>Preferred delivery type: </span>
+                                                {selected.client.preferredDeliveryType} to {selected.client.preferredDeliveryAddress}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        {!selected.isEditing && (
-                            <div className="client-pannel">
-                                <div className="actions">
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.CLOSE });
-                                            setButtonText("delete")
-                                        }}
-                                    >
-                                        close
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            dispatchSelected({ type: SELECTED_CLIENT_ACTIONS.MODIFY, payload: selected.client })
-                                            setButtonText("delete")
-                                        }}
-                                    >
-                                        edit
-                                    </button>
-                                </div>
-                                <div className="info">
-                                    <h1>{selected.client.name}</h1>
-                                    <p>Preferred delivery type: {selected.client.preferredDeliveryType}</p>
-                                </div>
-                            </div>
-                        )}   
-                    </div>                         
-                )}
+                            )}   
+                        </div>                         
+                    )}
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 }

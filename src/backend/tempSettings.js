@@ -6,7 +6,8 @@ export const SizeOptions = [
     {label: "10lb", value: "10lb"},
     {label: "Large box", value: "Large box"},
     {label: "Large bag", value: "Large bag"},
-    {label: "2nd grade", value: "2nd grade"}
+    {label: "2nd grade", value: "2nd grade"},
+    {label: "Jumbo", value: "Jumbo"}
 ];
 
 export const TypeOptions = [
@@ -29,7 +30,7 @@ export const ClientSortOptions = [
 
 export const DeliverTypeOptions = [
     {label: "choose delivery type", value: ""},
-    {label: "Delivery type 1", value: "type1"},
-    {label: "Delivery type 2", value: "type2"},
-    {label: "Delivery type 3", value: "type3"}
+    {label: "Toronto terminal", value: "Toronto terminal"},
+    {label: "Delivery", value: "Delivery"},
+    {label: "Pick up", value: "Pick up"}
 ];

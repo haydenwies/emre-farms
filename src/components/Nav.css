@@ -1,4 +1,6 @@
 .nav {
+    margin: 0 auto;
+    max-width: 1000px;
     width: 100%;
     overflow: hidden;
     z-index: 0;
@@ -17,7 +19,7 @@
     padding: 10px 12px 7px 12px;
     width: auto;
     border-radius: 10px;
-    background-color: rgb(169,169,169);
+    background-color: rgb(177,187,30);
     z-index: 2;
 }
 .nav-items {

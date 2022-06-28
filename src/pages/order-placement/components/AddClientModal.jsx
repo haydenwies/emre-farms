@@ -8,34 +8,41 @@ import DeliveryTypeDropdown from './DeliveryTypeDropdown';
 import '../OrderPlacement.css';
 
 export default function AddClientModal({ getClients, setShowModal }) {
-    const [newClient, setNewClient] = useState({name: "", preferredDeliveryType: ""});
+    const [newClient, setNewClient] = useState({ name: "", preferredDeliveryAddress: "", preferredDeliveryType: "" });
 
     const isOrderComplete = () => {
-        if (newClient.name.toLowerCase() !== "other") {
-            if (newClient.name !== "" && newClient.preferredDeliveryType !== "") {
-                return true;
-            } else {
-                return false;
-            };
+        if (
+            newClient.name !== "" && 
+            (
+                (newClient.preferredDeliveryType !== "" &&  newClient.preferredDeliveryType !== "Delivery") || 
+                (newClient.preferredDeliveryType === "Delivery" && newClient.preferredDeliveryAddress !== "")
+            )
+        ) {
+            return true;
         } else {
-            window.alert("Cannot name client 'other'.")
+            return false;
         };
     };
 
     const onSave = async () => {
-        const docRef = doc(collection(db, "clients"));
-        await setDoc(docRef, {
-            name: newClient.name,
-            id: docRef.id,
-            preferredDeliveryType: newClient.preferredDeliveryType
-        });
-        getClients()
-        setShowModal(false)
+        if (newClient.name.toLowerCase() !== "other") {
+            const docRef = doc(collection(db, "clients"));
+            await setDoc(docRef, {
+                name: newClient.name,
+                id: docRef.id,
+                preferredDeliveryAddress: newClient.preferredDeliveryAddress,
+                preferredDeliveryType: newClient.preferredDeliveryType
+            });
+            getClients()
+            setShowModal(false)
+        } else {
+            window.alert("Cannot name client 'other'.");
+        };
     }
 
     return (
         <div className="modal-frame">
-            <div className="modal">
+            <div className="add-client-modal">
                 <div className="options">
                     <button
                         onClick={(e) => {
@@ -62,15 +69,28 @@ export default function AddClientModal({ getClients, setShowModal }) {
                         placeholder="client name"
                         value={newClient.name}
                         onChange={(e) => {
-                            setNewClient({ name: e.target.value, preferredDeliveryType: newClient.preferredDeliveryType })
+                            console.log(newClient)
+                            setNewClient({ name: e.target.value, preferredDeliveryAddress: newClient.preferredDeliveryAddress, preferredDeliveryType: newClient.preferredDeliveryType })
                         }}
                     />
                     <DeliveryTypeDropdown 
                         value={newClient.preferredDeliveryType}
                         setValue={(preferredDeliveryType) => {
-                            setNewClient({ name: newClient.name, preferredDeliveryType: preferredDeliveryType })
+                            console.log(newClient)
+                            setNewClient({ name: newClient.name, preferredDeliveryAddress: newClient.preferredDeliveryAddress, preferredDeliveryType: preferredDeliveryType })
                         }}
                     />
+                    {newClient.preferredDeliveryType === "Delivery" && (                    
+                        <input 
+                            type="text" 
+                            placeholder="preferred delivery address"
+                            value={newClient.preferredDeliveryAddress}
+                            onChange={(e) => {
+                                console.log(newClient)
+                                setNewClient({ name: newClient.name, preferredDeliveryAddress: e.target.value, preferredDeliveryType: newClient.preferredDeliveryType })
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </div>
