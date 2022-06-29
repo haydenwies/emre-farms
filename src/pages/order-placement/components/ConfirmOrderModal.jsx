@@ -19,7 +19,7 @@ export default function ConfirmOrderModal({ order, otherClient, setShowConfirmOr
                         onSubmit();
                     }}
                 >
-                    submit order
+                    confirm submit
                 </button>
                 <div className="order-info">
                     {/* Client name */}
@@ -45,14 +45,17 @@ export default function ConfirmOrderModal({ order, otherClient, setShowConfirmOr
                         <p className="bold" >type</p>
                         <p className="bold" >size</p>
                         <p className="bold" >quantity</p>
-                        {order.order.map(item => (
-                            <>
-                                <p>{item.size}</p>
-                                <p>{item.type}</p>
-                                <p>{item.quantity}</p>
-                            </>
-                        ))}
                     </div>
+                    {order.order.map(item => (
+                        <div 
+                            key={item.id} 
+                            className="items"
+                        >
+                            <p>{item.size}</p>
+                            <p>{item.type}</p>
+                            <p>{item.quantity}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

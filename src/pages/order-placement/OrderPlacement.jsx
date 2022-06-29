@@ -45,8 +45,7 @@ export default function OrderPlacement() {
     // const [buttonText, setButtonText] = useState("submit order");
     const [otherClient, setOtherClient] = useState("");
 
-    const onSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async () => {
         // Check if order is valid
         if (isValidOrder()) {
             if (!showConfirmOrder) {
@@ -258,7 +257,6 @@ export default function OrderPlacement() {
                                 id={item.id}
                                 order={order.order}
                                 setOrder={(newOrder) => {
-                                    // setButtonText("submit order")
                                     setShowConfirmOrder(false);
                                     dispatchOrder({ 
                                         type: ORDER_DATA_ACTIONS.MODIFY,
@@ -287,7 +285,10 @@ export default function OrderPlacement() {
                 </div>
                 {/* Save order */}
                 <button
-                    onClick={onSubmit}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit()
+                    }}
                 >
                     submit order
                 </button>
@@ -302,6 +303,7 @@ export default function OrderPlacement() {
                         order={order}
                         otherClient={otherClient}
                         setShowConfirmOrder={setShowConfirmOrder}
+                        onSubmit={onSubmit}
                     />
                 )}
             </div>

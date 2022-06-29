@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useState } from 'react';
 import { useReducer } from 'react';
 
 import { SizeOptions, TypeOptions } from '../../../backend/tempSettings';
@@ -30,6 +32,8 @@ const reducer = (item, action) => {
 
 export default function ItemCard({ id, order, setOrder }) {
     const [item, dispatch] = useReducer(reducer, { id: id, size: "", type: "", quantity: undefined });
+    const [sizeOptions, setSizeOptions] = useState(SizeOptions)
+    const [typeOptions, setTypeOptions] = useState(TypeOptions)
 
     // Update order when attribute changes
     const updateOrder = () => {
@@ -44,28 +48,71 @@ export default function ItemCard({ id, order, setOrder }) {
         setOrder(newOrder)
     };
 
+    const filterSizeOptions = () => {
+        if (item.type !== "") {
+            const currentItemSizes = order.filter(x => x.type === item.type && x.id !== item.id)
+            const currentSizes = []
+            currentItemSizes.forEach((item) => {
+                if (currentSizes.filter(x => x === item.size).length === 0) {
+                    currentSizes.push(item.size)
+                }
+            })
+            const newSizeOptions = SizeOptions.filter(x => !currentSizes.includes(x.value))
+            setSizeOptions(newSizeOptions)
+            // return newSizeOptions;
+        } else {
+            setSizeOptions(SizeOptions)
+            // return SizeOptions;
+        }
+    }
+
+    const filterTypeOptions = () => {
+        if (item.size !== "") {
+            const currentItemTypes = order.filter(x => x.size === item.size && x.id !== item.id)
+            const currentTypes = []
+            currentItemTypes.forEach((item) => {
+                if (currentTypes.filter(x => x === item.type).length === 0) {
+                    currentTypes.push(item.type)
+                }
+            })
+            const newTypeOptions = TypeOptions.filter(x => !currentTypes.includes(x.value))
+            setTypeOptions(newTypeOptions);
+            // return newSizeOptions;
+        } else {
+            setTypeOptions(TypeOptions);
+            // return SizeOptions;
+        }
+    }
+
+    useEffect(() => {
+        updateOrder();
+    }, [item])
+
+    useEffect(() => {
+        filterSizeOptions()
+        filterTypeOptions()
+    }, [order])
+
     return (
         <div className='item-card'>
             <div className="item-options">
                 <div className="size-dropdown">
                     <Dropdown 
                         label={""}
-                        options={SizeOptions}
+                        options={sizeOptions}
                         value={item.size}
-                        onChange={(e) => { 
-                            dispatch({ type: ACTIONS.UPDATE_SIZE, payload: e.target.value });
-                            updateOrder();
+                        onChange={async (e) => { 
+                            dispatch({ type: ACTIONS.UPDATE_SIZE, payload: e.target.value })
                         }}
                     />
                 </div>
                 <div className="type-dropdown">
                     <Dropdown 
                         label={""}
-                        options={TypeOptions}
+                        options={typeOptions}
                         value={item.type}
                         onChange={(e) => { 
                             dispatch({ type: ACTIONS.UPDATE_TYPE, payload: e.target.value });
-                            updateOrder();
                         }}
                     />
                 </div>
@@ -78,7 +125,6 @@ export default function ItemCard({ id, order, setOrder }) {
                 onChange={(e) => { 
                     dispatch({ type: ACTIONS.UPDATE_QTY, payload: e.target.value });
                 }}
-                onBlur={updateOrder}
             />
             <button
                 onClick={(e) => {
