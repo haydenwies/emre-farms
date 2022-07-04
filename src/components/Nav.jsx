@@ -9,7 +9,7 @@ import { ArrowRightFromBracketSolid, BarsSolid, CircleUserSolid, PenToSquareSoli
 import './Nav.css'
 
 export default function Nav() {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const { logOut } = useLogOut();
     const { userType } = useAuthContext();

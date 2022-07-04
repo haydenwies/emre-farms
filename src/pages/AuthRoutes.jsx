@@ -18,7 +18,7 @@ export default function AuthRoutes() {
             <>
                 <Nav />
                 <Routes>
-                    <Route path={'/'} element={''} />
+                    <Route path={'/'} element={""} />
                     <Route path={'/order-overview'} element={<OrderOverview />} />
                     <Route path={'/order-placement'} element={<OrderPlacement />} />
                     <Route path={'/clients'} element={<Clients />} />
